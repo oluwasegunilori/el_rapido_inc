@@ -6,3 +6,5 @@ class LoginButtonPressed extends LoginEvent {
 
   LoginButtonPressed(this.email, this.password);
 }
+
+class GoogleSignInPressed extends LoginEvent {}
