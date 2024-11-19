@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "149971017649",
+    "project_id": "elrapidoinv-c3df4",
+    "storage_bucket": "elrapidoinv-c3df4.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:149971017649:android:092022e76be8643b972790",
+        "android_client_info": {
+          "package_name": "com.elrapido.inv"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCRFtJ-QixJJKY4bIdZotubpsBR7eIBGw4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
