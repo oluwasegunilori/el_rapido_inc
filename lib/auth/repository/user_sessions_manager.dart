@@ -2,7 +2,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 abstract class UserSessionManager {
-  Future<void> saveUserSession(UserCredential userCredential);
+  Future<void> saveUserLoginSession(UserCredential userCredential);
   Future<bool> isSessionExpired();
   Future<void> clearSession();
 }
@@ -14,7 +14,7 @@ class UserSessionManagerImpl implements UserSessionManager {
 
   // Save user credentials
   @override
-  Future<void> saveUserSession(UserCredential userCredential) async {
+  Future<void> saveUserLoginSession(UserCredential userCredential) async {
     final prefs = await SharedPreferences.getInstance();
     final expirationTime =
         DateTime.now().add(const Duration(days: 1)).toIso8601String();

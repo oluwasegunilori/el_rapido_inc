@@ -1,0 +1,14 @@
+{
+    "java.compile.nullAnalysis.mode": "disabled",
+    "configurations": [
+    {
+      "name": "Flutter Web",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "args": [
+        "--web-port=5000"  // Change this to your desired port
+      ]
+    }
+  ]
+}

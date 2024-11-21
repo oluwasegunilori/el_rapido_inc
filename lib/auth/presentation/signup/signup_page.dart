@@ -1,17 +1,25 @@
 import 'package:el_rapido_inc/auth/presentation/auth_page_router.dart';
-import 'package:el_rapido_inc/auth/presentation/login/login_bloc.dart';
-import 'package:el_rapido_inc/auth/presentation/login/login_event.dart';
-import 'package:el_rapido_inc/auth/presentation/login/login_state.dart';
+import 'package:el_rapido_inc/auth/presentation/signup/signup_bloc.dart';
+import 'package:el_rapido_inc/auth/presentation/signup/signup_event.dart';
+import 'package:el_rapido_inc/auth/presentation/signup/signup_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class LoginPage extends StatelessWidget {
+class SignupPage extends StatelessWidget {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  final TextEditingController firstNameController = TextEditingController();
+  final TextEditingController lastNameController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
+  final String? token;
+
+  SignupPage({super.key, this.token});
 
   @override
   Widget build(BuildContext context) {
+    SignupBloc signupBloc = SignupBloc();
+    signupBloc.add(UserVerification(token: token));
     return Scaffold(
       backgroundColor: Colors.blueGrey[50],
       appBar: AppBar(
@@ -23,14 +31,14 @@ class LoginPage extends StatelessWidget {
         backgroundColor: Colors.transparent,
       ),
       body: BlocProvider(
-        create: (_) => LoginBloc(),
-        child: BlocListener<LoginBloc, LoginState>(
+        create: (_) => signupBloc,
+        child: BlocListener<SignupBloc, SignupState>(
           listener: (context, state) {
-            if (state is LoginSuccess) {
+            if (state is SignupSuccess) {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Login Successful!')),
+                const SnackBar(content: Text('Signup Successful!')),
               );
-            } else if (state is LoginFailure) {
+            } else if (state is SignupFailure) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text(state.error)),
               );
@@ -58,12 +66,45 @@ class LoginPage extends StatelessWidget {
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Text("Login",
+                              Text("Signup",
                                   style: Theme.of(context)
                                       .textTheme
                                       .headlineSmall
                                       ?.copyWith(fontWeight: FontWeight.bold)),
                               const SizedBox(height: 16),
+                              //Firstname
+                              TextFormField(
+                                controller: firstNameController,
+                                decoration: InputDecoration(
+                                  labelText: 'First Name',
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  prefixIcon: const Icon(Icons.person),
+                                ),
+                                keyboardType: TextInputType.name,
+                                validator: (value) {
+                                  return validateName(value);
+                                },
+                              ),
+                              const SizedBox(height: 16),
+                              //Lastname
+                              TextFormField(
+                                controller: lastNameController,
+                                decoration: InputDecoration(
+                                  labelText: 'Last Name',
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  prefixIcon: const Icon(Icons.person),
+                                ),
+                                keyboardType: TextInputType.name,
+                                validator: (value) {
+                                  return validateName(value);
+                                },
+                              ),
+                              const SizedBox(height: 16),
+
                               // Email Input
                               TextFormField(
                                 controller: emailController,
@@ -101,10 +142,13 @@ class LoginPage extends StatelessWidget {
                                   if (_formKey.currentState!.validate()) {
                                     final email = emailController.text;
                                     final password = passwordController.text;
+                                    final firstName = firstNameController.text;
+                                    final lastName = lastNameController.text;
 
-                                    // Trigger Firebase Login
-                                    BlocProvider.of<LoginBloc>(context).add(
-                                      LoginButtonPressed(email, password),
+                                    // Trigger Firebase Signup
+                                    BlocProvider.of<SignupBloc>(context).add(
+                                      SignupButtonPressed(
+                                          email, password, firstName, lastName),
                                     );
                                   }
                                 },
@@ -116,7 +160,7 @@ class LoginPage extends StatelessWidget {
                                       horizontal: 50, vertical: 15),
                                 ),
                                 child: const Text(
-                                  "Login",
+                                  "Signup",
                                   style: TextStyle(fontWeight: FontWeight.bold),
                                 ),
                               ),
@@ -125,7 +169,7 @@ class LoginPage extends StatelessWidget {
                               // Google Sign-In Button
                               ElevatedButton.icon(
                                 onPressed: () {
-                                  BlocProvider.of<LoginBloc>(context)
+                                  BlocProvider.of<SignupBloc>(context)
                                       .add(GoogleSignInPressed());
                                 },
                                 style: ElevatedButton.styleFrom(
@@ -145,7 +189,10 @@ class LoginPage extends StatelessWidget {
                               ),
                               const SizedBox(height: 16),
                               const Divider(),
-                              routeWidget(text: "Create Account", route: "/signup", context: context),
+                              routeWidget(
+                                  text: "Login",
+                                  route: "/login",
+                                  context: context),
                             ],
                           ),
                         ),
@@ -175,6 +222,15 @@ class LoginPage extends StatelessWidget {
       return 'Please enter your email';
     } else if (!RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(value)) {
       return 'Enter a valid email';
+    }
+    return null;
+  }
+
+  String? validateName(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Please enter a valid anme';
+    } else if (!RegExp(r"^[a-zA-Z]+([ '-][a-zA-Z]+)*$").hasMatch(value)) {
+      return 'Enter a valid name';
     }
     return null;
   }
