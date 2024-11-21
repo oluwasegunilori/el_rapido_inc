@@ -1,3 +1,4 @@
+import 'package:el_rapido_inc/auth/presentation/dashboard/dashboard_page.dart';
 import 'package:el_rapido_inc/auth/presentation/login/login_page.dart';
 import 'package:el_rapido_inc/auth/presentation/signup/signup_page.dart';
 import 'package:el_rapido_inc/auth/presentation/splashscreen/splashscreen.dart';
@@ -18,8 +19,7 @@ final GoRouter appRrouter = GoRouter(
     GoRoute(
       path: '/signup',
       builder: (context, state) {
-        final String? token = state.uri.queryParameters['token'];
-        return SignupPage(token: token);
+        return SignupPage();
       },
     ),
     GoRoute(
@@ -27,6 +27,12 @@ final GoRouter appRrouter = GoRouter(
       builder: (context, state) {
         final String? token = state.uri.queryParameters['token'];
         return VerificationPage(token: token);
+      },
+    ),
+    GoRoute(
+      path: '/dashboard',
+      builder: (context, state) {
+        return const DashboardPage();
       },
     ),
   ],

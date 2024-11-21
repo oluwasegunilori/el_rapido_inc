@@ -1,7 +1,6 @@
+import 'package:el_rapido_inc/auth/presentation/auth_page_router.dart';
 import 'package:el_rapido_inc/auth/repository/user_sessions_manager.dart';
-import 'package:el_rapido_inc/core/app_router.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
 class SplashScreen extends StatelessWidget {
   SplashScreen({super.key});
@@ -19,9 +18,9 @@ class SplashScreen extends StatelessWidget {
   void _checkSession(BuildContext context) async {
     final isExpired = await userSessionManager.isSessionExpired();
     if (isExpired) {
-     context.pushReplacement('/login');
+      routeNeglect(context, route: "/login");
     } else {
-      Navigator.pushReplacementNamed(context, '/home');
+      routeNeglect(context, route: "/dashboard");
     }
   }
 }

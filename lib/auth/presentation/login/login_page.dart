@@ -30,12 +30,29 @@ class LoginPage extends StatelessWidget {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('Login Successful!')),
               );
+              routeNeglect(context, route: "/dashboard");
             } else if (state is LoginFailure) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text(state.error)),
               );
             } else if(state is LoginInitial) {
               emailController.text = state.email;
+            } else if(state is LoginNotActivated) {
+              showDialog(
+                context: context,
+                builder: (_) => AlertDialog(
+                  title: const Text("Error"),
+                  content: Text(state.error),
+                  actions: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      child: const Text("OK"),
+                    ),
+                  ],
+                ),
+              );
             }
           },
           child: Center(

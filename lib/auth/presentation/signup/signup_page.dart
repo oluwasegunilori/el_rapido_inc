@@ -12,14 +12,12 @@ class SignupPage extends StatelessWidget {
   final TextEditingController lastNameController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-  final String? token;
 
-  SignupPage({super.key, this.token});
+  SignupPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     SignupBloc signupBloc = SignupBloc();
-    signupBloc.add(UserVerification(token: token));
     return Scaffold(
       backgroundColor: Colors.blueGrey[50],
       appBar: AppBar(
@@ -183,7 +181,7 @@ class SignupPage extends StatelessWidget {
                                 ),
                                 icon: const Icon(Icons.auto_fix_high),
                                 label: const Text(
-                                  "Sign in with Google",
+                                  "Signup with Google",
                                   style: TextStyle(color: Colors.black),
                                 ),
                               ),

@@ -22,3 +22,8 @@ class LoginFailure extends LoginState {
   final String error;
   LoginFailure(this.error);
 }
+
+class LoginNotActivated extends LoginState {
+  final String error;
+  LoginNotActivated({required this.error});
+}

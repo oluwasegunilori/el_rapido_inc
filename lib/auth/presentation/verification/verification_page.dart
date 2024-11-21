@@ -33,7 +33,10 @@ class VerificationPage extends StatelessWidget {
                   content: const Text("Email verified successfully!"),
                   actions: [
                     TextButton(
-                      onPressed: () => Navigator.of(context).pop(),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        routeNeglect(context, route: "/dashboard");
+                      },
                       child: const Text("OK"),
                     ),
                   ],

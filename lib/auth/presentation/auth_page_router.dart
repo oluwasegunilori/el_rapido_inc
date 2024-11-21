@@ -8,7 +8,9 @@ Widget routeWidget(
   return Center(
       child: GestureDetector(
     onTap: () {
-      context.pushReplacement(route); // Navigate to the second screen
+      Router.neglect(
+          context,
+              () => context.go(route));
     },
     child: Text(
       text,
@@ -19,4 +21,13 @@ Widget routeWidget(
       ),
     ),
   ));
+}
+
+/**
+ * Removes previous destinations
+ */
+void routeNeglect(BuildContext context, {required String route}) {
+  Router.neglect(
+      context,
+          () => context.go(route));
 }
