@@ -34,6 +34,8 @@ class LoginPage extends StatelessWidget {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text(state.error)),
               );
+            } else if(state is LoginInitial) {
+              emailController.text = state.email;
             }
           },
           child: Center(

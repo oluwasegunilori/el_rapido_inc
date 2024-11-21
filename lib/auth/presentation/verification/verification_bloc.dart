@@ -46,6 +46,11 @@ class VerificationBloc extends Bloc<VerificationEvent, VerificationState> {
         return;
       }
 
+      // Update the user document to set `activated` to true
+      await firestore.collection('users').doc(event.token).update({
+        'activated': true,
+      });
+
       emit(VerificationSuccess());
     } catch (e) {
       emit(VerificationError("An error occurred: $e"));

@@ -1,6 +1,18 @@
-abstract class LoginState {}
+import 'package:equatable/equatable.dart';
 
-class LoginInitial extends LoginState {}
+abstract class LoginState extends Equatable {
+  @override
+  List<Object?> get props =>[];
+}
+
+class LoginInitial extends LoginState {
+  final String email;
+  LoginInitial({this.email = ""});
+
+  @override
+  List<Object?> get props => [email];
+
+}
 
 class LoginLoading extends LoginState {}
 

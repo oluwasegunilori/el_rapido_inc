@@ -1,7 +1,9 @@
+import 'package:el_rapido_inc/auth/presentation/auth_page_router.dart';
 import 'package:el_rapido_inc/auth/presentation/verification/verification_event.dart';
 import 'package:el_rapido_inc/auth/presentation/verification/verification_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'verification_bloc.dart';
 
 class VerificationPage extends StatelessWidget {
@@ -11,14 +13,15 @@ class VerificationPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    VerificationBloc verificationBloc = VerificationBloc();
     if (token != null) {
-      context.read<VerificationBloc>().add(VerifyTokenEvent(token!));
+      verificationBloc.add(VerifyTokenEvent(token!));
     }
     return BlocProvider(
-      create: (context) => VerificationBloc(),
+      create: (context) => verificationBloc,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text("Token Verification"),
+          title: const Text("Email Verification"),
         ),
         body: BlocConsumer<VerificationBloc, VerificationState>(
           listener: (context, state) {
@@ -27,7 +30,7 @@ class VerificationPage extends StatelessWidget {
                 context: context,
                 builder: (_) => AlertDialog(
                   title: const Text("Success"),
-                  content: const Text("Token verified successfully!"),
+                  content: const Text("Email verified successfully!"),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.of(context).pop(),
@@ -44,7 +47,10 @@ class VerificationPage extends StatelessWidget {
                   content: Text(state.message),
                   actions: [
                     TextButton(
-                      onPressed: () => Navigator.of(context).pop(),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        context.replace("/login");
+                      },
                       child: const Text("OK"),
                     ),
                   ],

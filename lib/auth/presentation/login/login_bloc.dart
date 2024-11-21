@@ -14,6 +14,8 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
   final UserSessionManager _userSessionManager = UserSessionManagerImpl();
 
   LoginBloc() : super(LoginInitial()) {
+    _initializeLogin();
+
     on<LoginButtonPressed>((event, emit) async {
       emit(LoginLoading());
       try {
@@ -59,5 +61,10 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
 
   void saveUserSignIn(UserCredential userCreds) {
     _userSessionManager.saveUserLoginSession(userCreds);
+  }
+
+  Future<void> _initializeLogin() async {
+    String email = await _userSessionManager.getLastEmail();
+    emit(LoginInitial(email: email));
   }
 }

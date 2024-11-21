@@ -5,6 +5,7 @@ abstract class UserSessionManager {
   Future<void> saveUserLoginSession(UserCredential userCredential);
   Future<bool> isSessionExpired();
   Future<void> clearSession();
+  Future<String> getLastEmail();
 }
 
 class UserSessionManagerImpl implements UserSessionManager {
@@ -40,5 +41,17 @@ class UserSessionManagerImpl implements UserSessionManager {
   Future<void> clearSession() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear();
+  }
+
+  @override
+  Future<String> getLastEmail() async {
+    final prefs = await SharedPreferences.getInstance();
+    final emailString = prefs.getString(_keyEmail);
+    if (emailString == null) {
+      return "";
+    } else {
+      return emailString;
+    }
+
   }
 }
