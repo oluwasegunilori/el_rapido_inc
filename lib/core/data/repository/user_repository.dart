@@ -23,8 +23,8 @@ const String USER_COLL = "users";
 class FirestoreUserRepository implements UserRepository {
   final FirebaseFirestore firestore;
 
-  FirestoreUserRepository({FirebaseFirestore? firestore})
-      : firestore = firestore ?? FirebaseFirestore.instance;
+  FirestoreUserRepository({required this.firestore});
+
 
   @override
   Future<void> createUser(User user) async {

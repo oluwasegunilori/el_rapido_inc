@@ -1,13 +1,19 @@
 import 'package:el_rapido_inc/core/app_router.dart';
+import 'package:el_rapido_inc/core/di/deps_inject.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'firebase_options.dart';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  setUrlStrategy(PathUrlStrategy());
+  if(kIsWeb) {
+    setUrlStrategy(PathUrlStrategy());
+  }
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  //Setup deps injection
+  await depsSetup();
 
   runApp(const MyApp());
 }

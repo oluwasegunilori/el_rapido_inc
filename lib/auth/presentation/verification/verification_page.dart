@@ -1,6 +1,7 @@
 import 'package:el_rapido_inc/auth/presentation/auth_page_router.dart';
 import 'package:el_rapido_inc/auth/presentation/verification/verification_event.dart';
 import 'package:el_rapido_inc/auth/presentation/verification/verification_state.dart';
+import 'package:el_rapido_inc/core/di/deps_inject.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -13,7 +14,7 @@ class VerificationPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    VerificationBloc verificationBloc = VerificationBloc();
+    VerificationBloc verificationBloc = getIt<VerificationBloc>();
     if (token != null) {
       verificationBloc.add(VerifyTokenEvent(token!));
     }

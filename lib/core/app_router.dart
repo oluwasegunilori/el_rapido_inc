@@ -3,6 +3,7 @@ import 'package:el_rapido_inc/auth/presentation/login/login_page.dart';
 import 'package:el_rapido_inc/auth/presentation/signup/signup_page.dart';
 import 'package:el_rapido_inc/auth/presentation/splashscreen/splashscreen.dart';
 import 'package:el_rapido_inc/auth/presentation/verification/verification_page.dart';
+import 'package:el_rapido_inc/main.dart';
 import 'package:go_router/go_router.dart';
 
 final GoRouter appRrouter = GoRouter(
@@ -33,6 +34,12 @@ final GoRouter appRrouter = GoRouter(
       path: '/dashboard',
       builder: (context, state) {
         return const DashboardPage();
+      },
+    ),
+    GoRoute(
+      path: '/home',
+      builder: (context, state) {
+        return const MyHomePage(title: "title");
       },
     ),
   ],

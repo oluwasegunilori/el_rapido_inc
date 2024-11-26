@@ -9,14 +9,13 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
-  final UserSessionManager _userSessionManager = UserSessionManagerImpl();
-  final UserRepository _userRepository = FirestoreUserRepository();
-  final FirebaseFirestore firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth;
+  final GoogleSignIn _googleSignIn;
+  final UserSessionManager _userSessionManager;
+  final UserRepository _userRepository;
+  final FirebaseFirestore firestore;
 
-
-  LoginBloc() : super(LoginInitial()) {
+  LoginBloc(this._auth, this._googleSignIn, this._userSessionManager, this._userRepository, this.firestore) : super(LoginInitial()) {
     on<LoginButtonPressed>((event, emit) async {
       emit(LoginLoading());
       try {
@@ -47,7 +46,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
           googleUser = await _googleSignIn.signIn();
         }
         final GoogleSignInAuthentication? googleAuth =
-        await googleUser?.authentication;
+            await googleUser?.authentication;
 
         if (googleAuth?.accessToken != null && googleAuth?.idToken != null) {
           final credential = GoogleAuthProvider.credential(
@@ -65,14 +64,15 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     });
   }
 
-  Future<void> confirmUserActivation(UserCredential userCreds, Emitter<LoginState> emit) async {
+  Future<void> confirmUserActivation(
+      UserCredential userCreds, Emitter<LoginState> emit) async {
     bool isUserActivated =
-    await _userRepository.isUserActivated(userCreds.user!.uid);
+        await _userRepository.isUserActivated(userCreds.user!.uid);
 
     if (!isUserActivated) {
       final actionCodeSettings = ActionCodeSettings(
         url:
-        "http://localhost:5000/signupverification?token=${userCreds.user?.uid}",
+            "http://localhost:5000/signupverification?token=${userCreds.user?.uid}",
       );
 
       await userCreds.user?.sendEmailVerification(actionCodeSettings);
@@ -81,12 +81,12 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         'verificationSentDate': Timestamp.now(),
       });
 
-      emit(LoginNotActivated(error: "Please check your email to verify your account"));
+      emit(LoginNotActivated(
+          error: "Please check your email to verify your account"));
     } else {
       saveUserSignIn(userCreds);
       emit(LoginSuccess());
     }
-
   }
 
   void saveUserSignIn(UserCredential userCreds) {

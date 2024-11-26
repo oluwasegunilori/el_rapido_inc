@@ -2,6 +2,7 @@ import 'package:el_rapido_inc/auth/presentation/auth_page_router.dart';
 import 'package:el_rapido_inc/auth/presentation/signup/signup_bloc.dart';
 import 'package:el_rapido_inc/auth/presentation/signup/signup_event.dart';
 import 'package:el_rapido_inc/auth/presentation/signup/signup_state.dart';
+import 'package:el_rapido_inc/core/di/deps_inject.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -17,7 +18,7 @@ class SignupPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    SignupBloc signupBloc = SignupBloc();
+    SignupBloc signupBloc = getIt<SignupBloc>();
     return Scaffold(
       backgroundColor: Colors.blueGrey[50],
       appBar: AppBar(

@@ -1,11 +1,12 @@
 import 'package:el_rapido_inc/auth/presentation/auth_page_router.dart';
 import 'package:el_rapido_inc/auth/repository/user_sessions_manager.dart';
+import 'package:el_rapido_inc/core/di/deps_inject.dart' as sl;
 import 'package:flutter/material.dart';
 
 class SplashScreen extends StatelessWidget {
   SplashScreen({super.key});
 
-  final userSessionManager = UserSessionManagerImpl();
+  final userSessionManager = sl.getIt<UserSessionManager>();
 
   @override
   Widget build(BuildContext context) {

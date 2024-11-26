@@ -7,11 +7,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../repository/user_sessions_manager.dart';
 
 class VerificationBloc extends Bloc<VerificationEvent, VerificationState> {
-  final FirebaseFirestore firestore = FirebaseFirestore.instance;
-  final UserSessionManager _userSessionManager = UserSessionManagerImpl();
+  final FirebaseFirestore firestore;
+  final UserSessionManager _userSessionManager;
 
-
-  VerificationBloc() : super(VerificationInitial()) {
+  VerificationBloc(this.firestore, this._userSessionManager) : super(VerificationInitial()) {
     on<VerifyTokenEvent>(_onVerifyToken);
   }
 
@@ -22,7 +21,8 @@ class VerificationBloc extends Bloc<VerificationEvent, VerificationState> {
     emit(VerificationLoading());
 
     try {
-      final userDoc = await firestore.collection('users').doc(event.token).get();
+      final userDoc =
+          await firestore.collection('users').doc(event.token).get();
 
       if (!userDoc.exists) {
         emit(const VerificationError("Token not found."));
@@ -55,9 +55,9 @@ class VerificationBloc extends Bloc<VerificationEvent, VerificationState> {
       await firestore.collection('users').doc(event.token).update({
         'activated': true,
       });
-      if(data != null) {
-        _userSessionManager.saveUserLoginSessionWithUser(
-            User.fromFirestore(data));
+      if (data != null) {
+        _userSessionManager
+            .saveUserLoginSessionWithUser(User.fromFirestore(data));
       }
       emit(VerificationSuccess());
     } catch (e) {

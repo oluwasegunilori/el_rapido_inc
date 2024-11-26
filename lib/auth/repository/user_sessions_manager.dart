@@ -12,14 +12,17 @@ abstract class UserSessionManager {
 }
 
 class UserSessionManagerImpl implements UserSessionManager {
+  final SharedPreferences prefs;
   static const String _keyUid = 'uid';
   static const String _keyEmail = 'email';
   static const String _keyExpiry = 'expiry';
 
+  UserSessionManagerImpl({required this.prefs});
+
   // Save user credentials
   @override
   Future<void> saveUserLoginSession(UserCredential userCredential) async {
-    final prefs = await SharedPreferences.getInstance();
+
     final expirationTime =
         DateTime.now().add(const Duration(days: 1)).toIso8601String();
 

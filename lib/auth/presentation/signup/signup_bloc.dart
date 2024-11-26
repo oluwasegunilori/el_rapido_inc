@@ -11,12 +11,12 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:el_rapido_inc/core/data/model/user.dart' as inUser;
 
 class SignupBloc extends Bloc<SignupEvent, SignupState> {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
-  final UserSessionManager _userSessionManager = UserSessionManagerImpl();
-  final UserRepository _userRepository = FirestoreUserRepository();
+  final FirebaseAuth _auth;
+  final GoogleSignIn _googleSignIn;
+  final UserSessionManager _userSessionManager;
+  final UserRepository _userRepository;
 
-  SignupBloc() : super(SignupInitial()) {
+  SignupBloc(this._auth, this._googleSignIn, this._userSessionManager, this._userRepository) : super(SignupInitial()) {
     on<SignupButtonPressed>((event, emit) async {
       emit(SignupLoading());
       try {
