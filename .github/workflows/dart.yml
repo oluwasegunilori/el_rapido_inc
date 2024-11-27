@@ -37,6 +37,9 @@ jobs:
 
       - name: Run tests
         run: flutter test --platform chrome  # Run tests on Chrome
+      
+      - name: Build web
+        run: flutter build web
 
   # Trigger the deploy workflow only if the tests pass
   deploy:
