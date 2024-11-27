@@ -1,17 +1,16 @@
-name: Flutter Test
+name: Flutter CI/CD Pipeline
 
 on:
   push:
     branches:
-      - main  # or the branch you want to run tests on
+      - main  # Specify the branches to trigger this workflow
   pull_request:
     branches:
-      - main  # or the branch you want to run tests on
+      - main
 
 jobs:
   flutter-test:
-    runs-on: ubuntu-latest  # You can also use macos-latest if you want to test on macOS
-
+    runs-on: ubuntu-latest  # You can change to macos-latest for macOS
     steps:
       - name: Check out code
         uses: actions/checkout@v3
@@ -19,7 +18,7 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-            flutter-version: '3.24.5'  # or specify a specific version
+          flutter-version: '3.24.5'
 
       - name: Cache Flutter dependencies
         uses: actions/cache@v3
@@ -35,16 +34,26 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Run tests
-        run: flutter test --platform chrome  # Run tests on Chrome
-      
-      - name: Build web
+      - name: Run Flutter tests
+        run: flutter test --platform chrome
+
+      - name: Build for web
         run: flutter build web
 
-      - name: Check available secrets
-        run: echo "FIREBASE_SERVICE_ACCOUNT=${{ secrets.FIREBASE_SERVICE_ACCOUNT }}" || echo "Secret not found"  
+      - name: Validate Firebase secret
+        run: echo "FIREBASE_SERVICE_ACCOUNT=${{ secrets.FIREBASE_SERVICE_ACCOUNT }}" || echo "Secret not found"
 
-  # Trigger the deploy workflow only if the tests pass
   deploy:
-    needs: flutter-test  # This ensures deployment only happens if tests succeed
-    uses: ./.github/workflows/deploy_to_firebase.yml  # Calls the deployment workflow
+    needs: flutter-test  # Ensures this job runs only if the test job succeeds
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Deploy to Firebase Hosting
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: '${{ secrets.GITHUB_TOKEN }}'
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_ELRAPIDOINV_C3DF4 }}'
+          channelId: live
+          projectId: elrapidoinv-c3df4
