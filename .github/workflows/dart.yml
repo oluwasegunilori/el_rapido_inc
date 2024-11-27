@@ -41,6 +41,9 @@ jobs:
       - name: Build web
         run: flutter build web
 
+      - name: Check available secrets
+        run: echo "FIREBASE_SERVICE_ACCOUNT=${{ secrets.FIREBASE_SERVICE_ACCOUNT }}" || echo "Secret not found"  
+
   # Trigger the deploy workflow only if the tests pass
   deploy:
     needs: flutter-test  # This ensures deployment only happens if tests succeed
