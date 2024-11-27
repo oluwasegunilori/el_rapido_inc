@@ -3,14 +3,14 @@ name: Flutter Test
 on:
   push:
     branches:
-      - main # or the branch you want to run tests on
+      - main  # or the branch you want to run tests on
   pull_request:
     branches:
-      - main # or the branch you want to run tests on
+      - main  # or the branch you want to run tests on
 
 jobs:
   flutter-test:
-    runs-on: ubuntu-latest # You can also use macos-latest if you want to test on macOS
+    runs-on: ubuntu-latest  # You can also use macos-latest if you want to test on macOS
 
     steps:
       - name: Check out code
@@ -19,7 +19,7 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-            flutter-version: '3.24.5' # or specify a specific version
+            flutter-version: '3.24.5'  # or specify a specific version
 
       - name: Cache Flutter dependencies
         uses: actions/cache@v3
@@ -30,21 +30,15 @@ jobs:
             .packages
           key: ${{ runner.os }}-flutter-${{ hashFiles('**/pubspec.yaml') }}
           restore-keys: |
-            ${{ runner.os }}-flutter-    
+            ${{ runner.os }}-flutter-
 
       - name: Install dependencies
         run: flutter pub get
 
       - name: Run tests
-        run: flutter test --platform chrome # on Chrome only
+        run: flutter test --platform chrome  # Run tests on Chrome
 
-      - name: Build Flutter Web
-        run: flutter build web
-      
-      - name: Install Firebase CLI
-        run: curl -sL https://firebase.tools | bash
-
-      - name: Firebase Deploy
-        env:
-          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}  # Set up the Firebase token as a secret in GitHub
-        run: firebase deploy --token $FIREBASE_TOKEN
+  # Trigger the deploy workflow only if the tests pass
+  deploy:
+    needs: flutter-test  # This ensures deployment only happens if tests succeed
+    uses: ./.github/workflows/deploy_to_firebase.yml  # Calls the deployment workflow
