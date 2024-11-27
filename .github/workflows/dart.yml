@@ -40,6 +40,9 @@ jobs:
 
       - name: Build Flutter Web
         run: flutter build web
+      
+      - name: Log in to Firebase
+        run: firebase login --token ${{ secrets.FIREBASE_TOKEN }}
 
       - name: Install Firebase CLI
         run: curl -sL https://firebase.tools | bash
