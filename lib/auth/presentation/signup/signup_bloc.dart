@@ -9,6 +9,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:el_rapido_inc/core/data/model/user.dart' as inUser;
+import 'package:flutter/foundation.dart';
+
 
 class SignupBloc extends Bloc<SignupEvent, SignupState> {
   final FirebaseAuth _auth;
@@ -26,8 +28,7 @@ class SignupBloc extends Bloc<SignupEvent, SignupState> {
         );
 
         final actionCodeSettings = ActionCodeSettings(
-          url:
-              "http://localhost:5000/signupverification?token=${userCreds.user?.uid}",
+          url: getVerificationLink(userCreds) ,
         );
 
         await userCreds.user?.sendEmailVerification(actionCodeSettings);
@@ -71,6 +72,11 @@ class SignupBloc extends Bloc<SignupEvent, SignupState> {
     on<UserVerification>((event, emit) async {
       emit(SignupLoading());
     });
+  }
+
+  String getVerificationLink(UserCredential userCreds) {
+    return kDebugMode ?
+            "http://localhost:5000/signupverification?token=${userCreds.user?.uid}" : "https://elrapidoinv-c3df4.web.app/signupverification?token=${userCreds.user?.uid}";
   }
 
   void saveUserSignIn(UserCredential userCreds) {
