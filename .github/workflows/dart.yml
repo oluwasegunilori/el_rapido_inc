@@ -3,14 +3,14 @@ name: Flutter CI/CD Pipeline
 on:
   push:
     branches:
-      - main  # Specify the branches to trigger this workflow
+      - main
   pull_request:
     branches:
       - main
 
 jobs:
   flutter-test:
-    runs-on: ubuntu-latest  # You can change to macos-latest for macOS
+    runs-on: ubuntu-latest
     steps:
       - name: Check out code
         uses: actions/checkout@v3
@@ -19,17 +19,6 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.24.5'
-
-      - name: Cache Flutter dependencies
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.pub-cache
-            .flutter-plugins
-            .packages
-          key: ${{ runner.os }}-flutter-${{ hashFiles('**/pubspec.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-flutter-
 
       - name: Install dependencies
         run: flutter pub get
@@ -40,11 +29,11 @@ jobs:
       - name: Build for web
         run: flutter build web
 
-      - name: Validate Firebase secret
-        run: echo "FIREBASE_SERVICE_ACCOUNT=${{ secrets.FIREBASE_SERVICE_ACCOUNT }}" || echo "Secret not found"
+      - name: Verify web build output
+        run: ls -al build/web  # Debugging step to confirm the build directory exists
 
   deploy:
-    needs: flutter-test  # Ensures this job runs only if the test job succeeds
+    needs: flutter-test
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
