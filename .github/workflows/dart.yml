@@ -44,10 +44,7 @@ jobs:
       - name: Install Firebase CLI
         run: curl -sL https://firebase.tools | bash
 
-      - name: Log in to Firebase
-        run: firebase login --token ${{ secrets.FIREBASE_TOKEN }}
-
       - name: Firebase Deploy
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}  # Set up the Firebase token as a secret in GitHub
-        run: firebase deploy --only hosting --token $FIREBASE_TOKEN
+        run: firebase deploy --token $FIREBASE_TOKEN
