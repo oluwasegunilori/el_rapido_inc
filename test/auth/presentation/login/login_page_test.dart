@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:bloc_test/bloc_test.dart';
-import 'package:el_rapido_inc/auth/presentation/dashboard/dashboard_page.dart';
+import 'package:el_rapido_inc/dashboard/dashboard_page.dart';
 import 'package:el_rapido_inc/auth/presentation/login/login_bloc.dart';
 import 'package:el_rapido_inc/auth/presentation/login/login_page.dart';
 import 'package:el_rapido_inc/auth/presentation/login/login_state.dart';

@@ -1,4 +1,4 @@
-import 'package:el_rapido_inc/auth/presentation/dashboard/dashboard_page.dart';
+import 'package:el_rapido_inc/dashboard/dashboard_page.dart';
 import 'package:el_rapido_inc/auth/presentation/login/login_page.dart';
 import 'package:el_rapido_inc/auth/presentation/signup/signup_page.dart';
 import 'package:el_rapido_inc/auth/presentation/splashscreen/splashscreen.dart';

@@ -4,6 +4,9 @@ import 'package:el_rapido_inc/auth/presentation/signup/signup_bloc.dart';
 import 'package:el_rapido_inc/auth/presentation/verification/verification_bloc.dart';
 import 'package:el_rapido_inc/auth/repository/user_sessions_manager.dart';
 import 'package:el_rapido_inc/core/data/repository/user_repository.dart';
+import 'package:el_rapido_inc/dashboard/inventory/data/inventory_repository_impl.dart';
+import 'package:el_rapido_inc/dashboard/inventory/domain/inventory_repository.dart';
+import 'package:el_rapido_inc/dashboard/inventory/presentation/inventory_bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -24,9 +27,14 @@ Future<void> depsSetup() async {
     UserSessionManagerImpl(prefs: prefs),
   );
 
+  //repos
   getIt.registerFactory<UserRepository>(
       () => FirestoreUserRepository(firestore: firestore));
 
+  getIt.registerFactory<InventoryRepository>(
+      () => FirebaseInventoryRepository(firestore: firestore));
+
+  //blocs
   getIt.registerFactory<VerificationBloc>(
       () => VerificationBloc(firestore, getIt<UserSessionManager>()));
 
@@ -35,4 +43,7 @@ Future<void> depsSetup() async {
 
   getIt.registerFactory<LoginBloc>(() => LoginBloc(_auth, _googleSignIn,
       getIt<UserSessionManager>(), getIt<UserRepository>(), firestore));
+
+  getIt.registerFactory<InventoryBloc>(
+      () => InventoryBloc(getIt<InventoryRepository>()));
 }
