@@ -32,18 +32,6 @@ void main() {
       whenListen(mockLoginBloc, streamController.stream,
           initialState: LoginInitial());
 
-      // whenListen(
-      //   mockLoginBloc,
-      //   Stream.fromIterable([
-      //     LoginInitial(),
-      //     LoginLoading(),
-      //     LoginFailure("Invalid credentials"),
-      //     LoginNotActivated(error: "Account not activated"),
-      //     LoginSuccess(),
-      //   ]),
-      //   initialState: LoginInitial(),
-      // );
-
       // Pump the app
       await tester.pumpWidget(MaterialApp.router(
         routerConfig: GoRouter(

@@ -1,4 +1,3 @@
-import 'package:el_rapido_inc/dashboard/inventory/domain/inventory.dart';
 import 'package:el_rapido_inc/dashboard/inventory/domain/inventory_repository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'inventory_event.dart';
@@ -10,11 +9,9 @@ class InventoryBloc extends Bloc<InventoryEvent, InventoryState> {
   InventoryBloc(this.repository) : super(InventoryInitial()) {
     on<LoadInventories>((event, emit) async {
       emit(InventoryLoading());
-      await emit.forEach<List<Inventory>>(
-        repository.fetchInventories(),
-        onData: (inventories) => InventoryLoaded(inventories),
-        onError: (error, stackTrace) => InventoryError(error.toString()),
-      );
+      await repository.fetchInventories().listen((data) {
+        emit(InventoryLoaded(data));
+      }).asFuture();
     });
 
     on<AddInventory>((event, emit) async {

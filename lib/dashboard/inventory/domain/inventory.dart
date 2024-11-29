@@ -9,6 +9,7 @@ class Inventory extends Equatable {
   final Timestamp? lastUpdated;
   final String? createdBy;
   final String description;
+  final String? imageUrl;
 
   const Inventory({
     required this.id,
@@ -16,6 +17,7 @@ class Inventory extends Equatable {
     required this.quantity,
     required this.price,
     required this.description,
+    this.imageUrl,
     this.createdBy,
     this.lastUpdated,
   });

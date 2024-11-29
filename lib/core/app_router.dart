@@ -1,3 +1,5 @@
+import 'package:el_rapido_inc/auth/repository/user_sessions_manager.dart';
+import 'package:el_rapido_inc/core/di/deps_inject.dart';
 import 'package:el_rapido_inc/dashboard/dashboard_page.dart';
 import 'package:el_rapido_inc/auth/presentation/login/login_page.dart';
 import 'package:el_rapido_inc/auth/presentation/signup/signup_page.dart';
@@ -6,7 +8,7 @@ import 'package:el_rapido_inc/auth/presentation/verification/verification_page.d
 import 'package:el_rapido_inc/main.dart';
 import 'package:go_router/go_router.dart';
 
-final GoRouter appRrouter = GoRouter(
+final GoRouter appRouter = GoRouter(
   initialLocation: '/',
   routes: [
     GoRoute(
@@ -19,9 +21,7 @@ final GoRouter appRrouter = GoRouter(
     ),
     GoRoute(
       path: '/signup',
-      builder: (context, state) {
-        return SignupPage();
-      },
+      builder: (context, state) => SignupPage(),
     ),
     GoRoute(
       path: '/signupverification',
@@ -32,15 +32,33 @@ final GoRouter appRrouter = GoRouter(
     ),
     GoRoute(
       path: '/dashboard',
-      builder: (context, state) {
-        return const DashboardPage();
-      },
+      builder: (context, state) => const DashboardPage(),
     ),
     GoRoute(
       path: '/home',
-      builder: (context, state) {
-        return const MyHomePage(title: "title");
-      },
+      builder: (context, state) => const MyHomePage(title: "title"),
     ),
   ],
+  redirect: (context, state) async {
+    String? fullPath = state.fullPath;
+    if (fullPath == "/" || fullPath == "/login" || fullPath == "/signup") {
+      return null;
+    }
+    // Perform session check centrally
+    final userSessionManager = getIt<UserSessionManager>();
+    final isExpired = await userSessionManager.isSessionExpired();
+
+    // If the session is expired, redirect to login
+    if (isExpired && state.fullPath != '/login') {
+      return '/login';
+    }
+
+    // If not expired, ensure the user is routed appropriately
+    if (!isExpired && state.fullPath == '/') {
+      return '/dashboard';
+    }
+
+    // No redirection needed
+    return null;
+  },
 );

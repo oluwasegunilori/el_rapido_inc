@@ -1,31 +1,35 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:el_rapido_inc/auth/repository/user_sessions_manager.dart';
 import 'package:el_rapido_inc/dashboard/inventory/domain/inventory.dart';
 import 'package:el_rapido_inc/dashboard/inventory/domain/inventory_repository.dart';
 import 'package:uuid/uuid.dart';
 
 class FirebaseInventoryRepository implements InventoryRepository {
-  final FirebaseFirestore _firestore;
+  final FirebaseFirestore firestore;
+  final UserSessionManager userSessionManager;
 
-  FirebaseInventoryRepository({required FirebaseFirestore firestore})
-      : _firestore = firestore;
+  FirebaseInventoryRepository(
+      {required this.firestore, required this.userSessionManager});
 
   @override
   Future<void> createInventory(Inventory inventory) async {
     String uniqueId = Uuid().v4();
-    await _firestore.collection('inventories').doc(uniqueId).set({
+    String userId = await userSessionManager.getUserId();
+    await firestore.collection('inventories').doc(uniqueId).set({
       'id': uniqueId,
       'name': inventory.name,
       'quantity': inventory.quantity,
       'price': inventory.price,
-      'createdBy': inventory.createdBy,
+      'createdBy': userId,
       'description': inventory.description,
-      'lastUpdated': Timestamp.now()
+      'lastUpdated': Timestamp.now(),
+      'imageUrl': inventory.imageUrl
     });
   }
 
   @override
   Stream<List<Inventory>> fetchInventories() {
-    return _firestore.collection('inventories').snapshots().map((snapshot) {
+    return firestore.collection('inventories').snapshots().map((snapshot) {
       return snapshot.docs.map((doc) {
         return Inventory(
           id: doc.id,
@@ -35,6 +39,7 @@ class FirebaseInventoryRepository implements InventoryRepository {
           createdBy: doc['createdBy'],
           description: doc['description'],
           lastUpdated: doc['lastUpdated'] as Timestamp,
+          imageUrl: doc['imageUrl']
         );
       }).toList();
     });
@@ -42,18 +47,18 @@ class FirebaseInventoryRepository implements InventoryRepository {
 
   @override
   Future<void> updateInventory(Inventory inventory) async {
-    await _firestore.collection('inventories').doc(inventory.id).update({
+    await firestore.collection('inventories').doc(inventory.id).update({
       'name': inventory.name,
       'quantity': inventory.quantity,
       'price': inventory.price,
-      'createdBy': inventory.createdBy,
       'description': inventory.description,
       'lastUpdated': Timestamp.now(),
+      'imageUrl': inventory.imageUrl,
     });
   }
 
   @override
   Future<void> deleteInventory(String id) async {
-    await _firestore.collection('inventories').doc(id).delete();
+    await firestore.collection('inventories').doc(id).delete();
   }
 }

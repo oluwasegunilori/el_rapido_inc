@@ -2,13 +2,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:el_rapido_inc/core/data/model/user.dart' as inUser;
 
-
 abstract class UserSessionManager {
   Future<void> saveUserLoginSession(UserCredential userCredential);
   Future<void> saveUserLoginSessionWithUser(inUser.User user);
   Future<bool> isSessionExpired();
   Future<void> clearSession();
   Future<String> getLastEmail();
+  Future<String> getUserId();
 }
 
 class UserSessionManagerImpl implements UserSessionManager {
@@ -22,7 +22,6 @@ class UserSessionManagerImpl implements UserSessionManager {
   // Save user credentials
   @override
   Future<void> saveUserLoginSession(UserCredential userCredential) async {
-
     final expirationTime =
         DateTime.now().add(const Duration(days: 1)).toIso8601String();
 
@@ -58,18 +57,27 @@ class UserSessionManagerImpl implements UserSessionManager {
     } else {
       return emailString;
     }
-
   }
 
   @override
   Future<void> saveUserLoginSessionWithUser(inUser.User user) async {
     final prefs = await SharedPreferences.getInstance();
     final expirationTime =
-    DateTime.now().add(const Duration(days: 1)).toIso8601String();
+        DateTime.now().add(const Duration(days: 1)).toIso8601String();
 
     await prefs.setString(_keyUid, user.id);
     await prefs.setString(_keyEmail, user.email);
     await prefs.setString(_keyExpiry, expirationTime);
-
+  }
+  
+  @override
+  Future<String> getUserId() async {
+    final prefs = await SharedPreferences.getInstance();
+    final idString = prefs.getString(_keyUid);
+    if (idString == null) {
+      return "";
+    } else {
+      return idString;
+    }
   }
 }

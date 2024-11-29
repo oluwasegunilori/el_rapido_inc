@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bloc_test/bloc_test.dart';
 import 'package:el_rapido_inc/auth/presentation/login/login_bloc.dart';
 import 'package:el_rapido_inc/auth/presentation/login/login_event.dart';
@@ -7,7 +9,6 @@ import 'package:el_rapido_inc/core/app_router.dart';
 import 'package:el_rapido_inc/core/di/deps_inject.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:get_it/get_it.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 
@@ -27,12 +28,13 @@ void main() {
         mockUserSessionManager,
       );
       getIt.registerFactory<LoginBloc>(() => mockLoginBloc);
+      // Arrange
+      whenListen(mockLoginBloc, Stream.fromIterable([LoginInitial()]),
+          initialState: LoginInitial());
     });
 
     tearDown(() {
-      GetIt.instance.reset();
-      // Ensure any lingering widget states are cleared.
-      TestWidgetsFlutterBinding.ensureInitialized();
+      getIt.reset();
     });
 
     testWidgets('Navigates to /login if session is expired', (tester) async {
@@ -40,44 +42,44 @@ void main() {
       when(mockUserSessionManager.isSessionExpired())
           .thenAnswer((_) async => true);
 
-      whenListen(mockLoginBloc, Stream.fromIterable([LoginInitial()]),
-          initialState: LoginInitial());
+      appRouter.go("/");
 
       // Override the userSessionManager instance in SplashScreen
       await tester.pumpWidget(MaterialApp.router(
-        routerConfig: appRrouter,
+        routerConfig: appRouter,
       ));
 
-      verify(mockUserSessionManager.isSessionExpired()).called(1);
-
-      // Assert
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      //Verify initial app router
+      expect(appRouter.state?.fullPath, equals("/"));
 
       await tester.pumpAndSettle();
-      // Assert Login Navigation
-      expect(find.text("Login"), findsAny);
 
+      // Assert Login Navigation
+      expect(appRouter.state?.fullPath, equals("/login"));
+      expect(find.text("Login"), findsAny);
     });
 
     testWidgets('Navigates to /dashboard if session is not expired',
         (tester) async {
-      //    
-      appRrouter.go("/");
       // Arrange
       when(mockUserSessionManager.isSessionExpired())
           .thenAnswer((_) async => false);
 
+      //Verify initial app router
+      // expect(appRouter.state?.fullPath, equals("/"));
+
       // Override the userSessionManager instance in SplashScreen
       await tester.pumpWidget(MaterialApp.router(
-        routerConfig: appRrouter,
+        routerConfig: appRouter,
       ));
 
-      verify(mockUserSessionManager.isSessionExpired()).called(1);
-
-      // Assert
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      appRouter.go("/");
 
       await tester.pumpAndSettle();
+
+      // Assert Dashboard Navigation
+      expect(appRouter.state?.fullPath, equals("/dashboard"));
+
       // Assert Login Navigation
       expect(find.text("Inventories"), findsAny);
     });

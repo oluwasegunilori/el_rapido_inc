@@ -32,7 +32,7 @@ Future<void> depsSetup() async {
       () => FirestoreUserRepository(firestore: firestore));
 
   getIt.registerFactory<InventoryRepository>(
-      () => FirebaseInventoryRepository(firestore: firestore));
+      () => FirebaseInventoryRepository(firestore: firestore, userSessionManager: getIt<UserSessionManager>()));
 
   //blocs
   getIt.registerFactory<VerificationBloc>(
