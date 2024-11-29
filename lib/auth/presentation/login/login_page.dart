@@ -117,19 +117,15 @@ class LoginPage extends StatelessWidget {
                                     validator: (value) {
                                       return validatePassword(value);
                                     },
+                                    onFieldSubmitted: (newValue) {
+                                      validateLogin(context);
+                                    },
                                   ),
                                   const SizedBox(height: 24),
                                   ElevatedButton(
                                     onPressed: () {
                                       if (_formKey.currentState!.validate()) {
-                                        final email = emailController.text;
-                                        final password =
-                                            passwordController.text;
-
-                                        // Trigger Firebase Login
-                                        BlocProvider.of<LoginBloc>(context).add(
-                                          LoginButtonPressed(email, password),
-                                        );
+                                        validateLogin(context);
                                       }
                                     },
                                     style: ElevatedButton.styleFrom(
@@ -189,6 +185,16 @@ class LoginPage extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+
+  void validateLogin(BuildContext context) {
+    final email = emailController.text;
+    final password = passwordController.text;
+
+    // Trigger Firebase Login
+    BlocProvider.of<LoginBloc>(context).add(
+      LoginButtonPressed(email, password),
     );
   }
 
