@@ -1,12 +1,16 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:dio/dio.dart';
 import 'package:el_rapido_inc/auth/presentation/login/login_bloc.dart';
 import 'package:el_rapido_inc/auth/presentation/signup/signup_bloc.dart';
 import 'package:el_rapido_inc/auth/presentation/verification/verification_bloc.dart';
 import 'package:el_rapido_inc/auth/repository/user_sessions_manager.dart';
 import 'package:el_rapido_inc/core/data/repository/user_repository.dart';
+import 'package:el_rapido_inc/dashboard/inventory/data/image_upload_reposiotry_impl.dart';
 import 'package:el_rapido_inc/dashboard/inventory/data/inventory_repository_impl.dart';
+import 'package:el_rapido_inc/dashboard/inventory/domain/image_upload_repository.dart';
 import 'package:el_rapido_inc/dashboard/inventory/domain/inventory_repository.dart';
 import 'package:el_rapido_inc/dashboard/inventory/presentation/inventory_bloc.dart';
+import 'package:el_rapido_inc/dashboard/inventory/presentation/uploader/image_upload_bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -21,6 +25,7 @@ Future<void> depsSetup() async {
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final Dio dio = Dio();
 
   // Register UserSessionManager implementation as a singleton
   getIt.registerSingleton<UserSessionManager>(
@@ -31,8 +36,11 @@ Future<void> depsSetup() async {
   getIt.registerFactory<UserRepository>(
       () => FirestoreUserRepository(firestore: firestore));
 
-  getIt.registerFactory<InventoryRepository>(
-      () => FirebaseInventoryRepository(firestore: firestore, userSessionManager: getIt<UserSessionManager>()));
+  getIt.registerFactory<InventoryRepository>(() => FirebaseInventoryRepository(
+      firestore: firestore, userSessionManager: getIt<UserSessionManager>()));
+
+  getIt.registerFactory<ImageUploadRepository>(
+      () => ImageUploadRepostoryImpl(dio: dio));
 
   //blocs
   getIt.registerFactory<VerificationBloc>(
@@ -46,4 +54,7 @@ Future<void> depsSetup() async {
 
   getIt.registerFactory<InventoryBloc>(
       () => InventoryBloc(getIt<InventoryRepository>()));
+
+  getIt.registerFactory<ImageUploadBloc>(
+      () => ImageUploadBloc(getIt<ImageUploadRepository>()));
 }

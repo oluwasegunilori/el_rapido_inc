@@ -37,9 +37,18 @@ class InventoryPage extends StatelessWidget {
             } else if (state is InventoryLoaded) {
               return ResponsiveGridList(
                   desiredItemWidth: 200,
-                  children: state.inventories
-                      .map((e) => InventoryItem(inventory: e))
-                      .toList());
+                  children: state.inventories.map((inven) {
+                    return InventoryItem(
+                      inventory: inven,
+                      onEdit: () {
+                        showCreateInventoryDialog(context, inven,
+                            (inventoryUpdated) {
+                          inventoryBloc.add(UpdateInventory(inventoryUpdated));
+                        });
+                      },
+                      onDelete: () {},
+                    );
+                  }).toList());
             } else if (state is InventoryError) {
               return Center(child: Text(state.error));
             }
@@ -48,10 +57,9 @@ class InventoryPage extends StatelessWidget {
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: () {
-            showCreateInventoryDialog(
-              context,
-              (inventory) => inventoryBloc.add(AddInventory(inventory)),
-            );
+            showCreateInventoryDialog(context, null, (inventory) {
+              inventoryBloc.add(AddInventory(inventory));
+            });
           },
           child: const Icon(Icons.add),
         ),
