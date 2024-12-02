@@ -56,7 +56,7 @@ class LoginPage extends StatelessWidget {
           child: BlocBuilder<LoginBloc, LoginState>(
             builder: (context, state) {
               if (state is LoginLoading) {
-                return const CircularProgressIndicator();
+                return const Center(child: CircularProgressIndicator());
               }
               return Center(
                 child: SingleChildScrollView(
