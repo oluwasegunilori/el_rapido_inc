@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:el_rapido_inc/auth/repository/user_sessions_manager.dart';
+import 'package:el_rapido_inc/core/data/repository/logger_repository.dart';
 import 'package:el_rapido_inc/dashboard/inventory/domain/inventory.dart';
 import 'package:el_rapido_inc/dashboard/inventory/domain/inventory_repository.dart';
 import 'package:uuid/uuid.dart';
@@ -7,9 +8,12 @@ import 'package:uuid/uuid.dart';
 class FirebaseInventoryRepository implements InventoryRepository {
   final FirebaseFirestore firestore;
   final UserSessionManager userSessionManager;
+  final LoggerRepository loggerRepository;
 
   FirebaseInventoryRepository(
-      {required this.firestore, required this.userSessionManager});
+      {required this.firestore,
+      required this.userSessionManager,
+      required this.loggerRepository});
 
   @override
   Future<void> createInventory(Inventory inventory) async {
@@ -32,29 +36,52 @@ class FirebaseInventoryRepository implements InventoryRepository {
     return firestore.collection('inventories').snapshots().map((snapshot) {
       return snapshot.docs.map((doc) {
         return Inventory(
-          id: doc.id,
-          name: doc['name'],
-          quantity: doc['quantity'],
-          price: doc['price'],
-          createdBy: doc['createdBy'],
-          description: doc['description'],
-          lastUpdated: doc['lastUpdated'] as Timestamp,
-          imageUrl: doc['imageUrl']
-        );
+            id: doc.id,
+            name: doc['name'],
+            quantity: doc['quantity'],
+            price: doc['price'],
+            createdBy: doc['createdBy'],
+            description: doc['description'],
+            lastUpdated: doc['lastUpdated'] as Timestamp,
+            imageUrl: doc['imageUrl']);
       }).toList();
     });
   }
 
   @override
   Future<void> updateInventory(Inventory inventory) async {
-    await firestore.collection('inventories').doc(inventory.id).update({
-      'name': inventory.name,
-      'quantity': inventory.quantity,
-      'price': inventory.price,
-      'description': inventory.description,
-      'lastUpdated': Timestamp.now(),
-      'imageUrl': inventory.imageUrl,
-    });
+    final docRef = firestore.collection('inventories').doc(inventory.id);
+    final snapshot = await docRef.get();
+    if (snapshot.exists) {
+      final oldData = snapshot.data() ?? {};
+
+      final updatedData = {
+        'name': inventory.name,
+        'quantity': inventory.quantity,
+        'price': inventory.price,
+        'description': inventory.description,
+        'lastUpdated': Timestamp.now(),
+        'imageUrl': inventory.imageUrl,
+      };
+
+      // Calculate changes
+      final changes = loggerRepository.getChanges(
+        oldData: oldData,
+        newData: updatedData,
+      );
+
+      // Update the inventory
+      await docRef.update(updatedData);
+
+      // Log changes if any
+      if (changes.isNotEmpty) {
+        await loggerRepository.logChange(
+          action: 'update',
+          id: inventory.id,
+          changes: changes,
+        );
+      }
+    }
   }
 
   @override

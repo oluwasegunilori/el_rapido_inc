@@ -44,7 +44,8 @@ void showCreateInventoryDialog(
           return BlocProvider(
             create: (_) => imageUploadBloc,
             child: AlertDialog(
-              title: const Text('Add Inventory'),
+              title: Text(
+                  inventory == null ? 'Add Inventory' : "Update Inventory"),
               content: SizedBox(
                 width: dialogWidth.clamp(0, 500),
                 child: SingleChildScrollView(

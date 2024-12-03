@@ -14,7 +14,7 @@ class DashboardPageState extends State<DashboardPage> {
   final List<Widget> _pages = [
     const Center(child: Text('Users Page', style: TextStyle(fontSize: 24))),
     const InventoryPage(),
-    const Center(child: Text('Stores Page', style: TextStyle(fontSize: 24))),
+    const Center(child: Text('Merchants Page', style: TextStyle(fontSize: 24))),
   ];
 
   @override
@@ -92,7 +92,7 @@ class DashboardPageState extends State<DashboardPage> {
               NavigationRailDestination(
                 icon: Icon(Icons.store),
                 selectedIcon: Icon(Icons.storefront),
-                label: Text('Stores'),
+                label: Text('Merchants'),
               ),
             ],
           ),

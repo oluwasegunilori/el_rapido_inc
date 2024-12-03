@@ -4,6 +4,7 @@ import 'package:el_rapido_inc/auth/presentation/login/login_bloc.dart';
 import 'package:el_rapido_inc/auth/presentation/signup/signup_bloc.dart';
 import 'package:el_rapido_inc/auth/presentation/verification/verification_bloc.dart';
 import 'package:el_rapido_inc/auth/repository/user_sessions_manager.dart';
+import 'package:el_rapido_inc/core/data/repository/logger_repository.dart';
 import 'package:el_rapido_inc/core/data/repository/user_repository.dart';
 import 'package:el_rapido_inc/dashboard/inventory/data/image_upload_reposiotry_impl.dart';
 import 'package:el_rapido_inc/dashboard/inventory/data/inventory_repository_impl.dart';
@@ -37,10 +38,15 @@ Future<void> depsSetup() async {
       () => FirestoreUserRepository(firestore: firestore));
 
   getIt.registerFactory<InventoryRepository>(() => FirebaseInventoryRepository(
-      firestore: firestore, userSessionManager: getIt<UserSessionManager>()));
+      firestore: firestore,
+      userSessionManager: getIt<UserSessionManager>(),
+      loggerRepository: getIt<LoggerRepository>()));
 
   getIt.registerFactory<ImageUploadRepository>(
       () => ImageUploadRepostoryImpl(dio: dio));
+
+  getIt.registerFactory<LoggerRepository>(
+      () => FirebaseLoggerRepository(firestore));
 
   //blocs
   getIt.registerFactory<VerificationBloc>(
