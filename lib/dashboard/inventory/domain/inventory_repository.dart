@@ -5,4 +5,5 @@ abstract class InventoryRepository {
   Stream<List<Inventory>> fetchInventories(); // Changed to Stream
   Future<void> updateInventory(Inventory inventory);
   Future<void> deleteInventory(String id);
+  Future<void> updateInventoryQuantity(String inventoryId, int quantity);
 }

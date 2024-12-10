@@ -12,6 +12,8 @@ import 'package:el_rapido_inc/dashboard/inventory/domain/image_upload_repository
 import 'package:el_rapido_inc/dashboard/inventory/domain/inventory_repository.dart';
 import 'package:el_rapido_inc/dashboard/inventory/presentation/inventory_bloc.dart';
 import 'package:el_rapido_inc/dashboard/inventory/presentation/uploader/image_upload_bloc.dart';
+import 'package:el_rapido_inc/dashboard/merchant/data/repository/merchants_repository.dart';
+import 'package:el_rapido_inc/dashboard/merchant/presentation/merchants_bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -48,6 +50,9 @@ Future<void> depsSetup() async {
   getIt.registerFactory<LoggerRepository>(
       () => FirebaseLoggerRepository(firestore));
 
+  getIt.registerFactory<MerchantsRepository>(
+      () => MerchantsRepositoryImpl(firestore, getIt<InventoryRepository>()));
+
   //blocs
   getIt.registerFactory<VerificationBloc>(
       () => VerificationBloc(firestore, getIt<UserSessionManager>()));
@@ -63,4 +68,7 @@ Future<void> depsSetup() async {
 
   getIt.registerFactory<ImageUploadBloc>(
       () => ImageUploadBloc(getIt<ImageUploadRepository>()));
+
+  getIt.registerFactory<MerchantBloc>(
+      () => MerchantBloc(getIt<MerchantsRepository>()));
 }

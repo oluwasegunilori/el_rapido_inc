@@ -34,5 +34,19 @@ class Inventory extends Equatable {
       ];
 
   @override
-  bool get stringify => true; // Makes toString() return props for easier debugging
+  bool get stringify => true;
+
+  /// Factory constructor to create an Inventory instance from a map.
+  factory Inventory.fromMap(Map<String, dynamic> map) {
+    return Inventory(
+      id: map['id'] as String,
+      name: map['name'] as String,
+      quantity: map['quantity'] as int,
+      price: (map['price'] as num).toDouble(),
+      lastUpdated: map['lastUpdated'] as Timestamp?,
+      createdBy: map['createdBy'] as String?,
+      description: map['description'] as String,
+      imageUrl: map['imageUrl'] as String?,
+    );
+  }
 }

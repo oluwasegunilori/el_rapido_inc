@@ -1,18 +1,18 @@
-import 'package:el_rapido_inc/dashboard/inventory/domain/inventory.dart';
+import 'package:el_rapido_inc/dashboard/merchant/data/model/mechants_model.dart';
 import 'package:flutter/material.dart';
 
-class InventoryItem extends StatelessWidget {
-  final Inventory inventory;
+class MerchantItem extends StatelessWidget {
+  final Merchant merchant;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
-  final VoidCallback onManageMerchants;
+  final VoidCallback onManageInventory;
 
-  const InventoryItem({
+  const MerchantItem({
     super.key,
-    required this.inventory,
+    required this.merchant,
     required this.onEdit,
     required this.onDelete,
-    required this.onManageMerchants,
+    required this.onManageInventory,
   });
 
   @override
@@ -29,28 +29,10 @@ class InventoryItem extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                ClipRRect(
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(12),
-                    topRight: Radius.circular(12),
-                  ),
-                  child: inventory.imageUrl?.isNotEmpty == true
-                      ? Image.network(
-                          inventory.imageUrl!,
-                          fit: BoxFit.cover,
-                          width: double.infinity,
-                          height: 150,
-                        )
-                      : const Icon(
-                          Icons.image_not_supported,
-                          size: 50,
-                          color: Colors.grey,
-                        ),
-                ),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Text(
-                    inventory.name,
+                    merchant.name,
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
@@ -60,14 +42,7 @@ class InventoryItem extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8.0),
                   child: Text(
-                    'Quantity: ${inventory.quantity}',
-                    style: const TextStyle(fontSize: 14),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                  child: Text(
-                    'Price: \$${inventory.price}',
+                    merchant.location,
                     style: const TextStyle(fontSize: 14),
                   ),
                 ),
@@ -86,8 +61,8 @@ class InventoryItem extends StatelessWidget {
                   case 'delete':
                     onDelete();
                     break;
-                  case 'merchants':
-                    onManageMerchants();
+                  case 'inventory':
+                    onManageInventory();
                 }
               },
               itemBuilder: (context) => [
@@ -100,7 +75,9 @@ class InventoryItem extends StatelessWidget {
                   child: Text('Delete'),
                 ),
                 const PopupMenuItem(
-                    value: "merchants", child: Text("Merchants"))
+                  value: "inventory",
+                  child: Text("Manage Inventory"),
+                ),
               ],
               icon: const Icon(Icons.more_vert),
             ),

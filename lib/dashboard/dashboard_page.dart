@@ -1,4 +1,5 @@
 import 'package:el_rapido_inc/dashboard/inventory/presentation/inventory_page.dart';
+import 'package:el_rapido_inc/dashboard/merchant/presentation/merchants_page.dart';
 import 'package:flutter/material.dart';
 
 class DashboardPage extends StatefulWidget {
@@ -14,7 +15,7 @@ class DashboardPageState extends State<DashboardPage> {
   final List<Widget> _pages = [
     const Center(child: Text('Users Page', style: TextStyle(fontSize: 24))),
     const InventoryPage(),
-    const Center(child: Text('Merchants Page', style: TextStyle(fontSize: 24))),
+    const MerchantPage(),
   ];
 
   @override

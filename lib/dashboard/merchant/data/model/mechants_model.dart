@@ -1,13 +1,13 @@
-import 'package:el_rapido_inc/dashboard/inventory/domain/inventory.dart';
+import 'package:el_rapido_inc/dashboard/merchant/data/model/merchant_inventory.dart';
 import 'package:equatable/equatable.dart';
 
-class Merchants extends Equatable {
+class Merchant extends Equatable {
   final String id;
   final String name;
   final String location;
-  final List<Inventory> inventoryList;
+  final List<MerchantInventory> inventoryList;
 
-  const Merchants({
+  const Merchant({
     required this.id,
     required this.name,
     required this.location,
@@ -17,13 +17,13 @@ class Merchants extends Equatable {
   @override
   List<Object?> get props => [id, name, location, inventoryList];
 
-  Merchants copyWith({
+  Merchant copyWith({
     String? id,
     String? name,
     String? location,
-    List<Inventory>? inventoryList,
+    List<MerchantInventory>? inventoryList,
   }) {
-    return Merchants(
+    return Merchant(
       id: id ?? this.id,
       name: name ?? this.name,
       location: location ?? this.location,

@@ -17,7 +17,7 @@ class FirebaseInventoryRepository implements InventoryRepository {
 
   @override
   Future<void> createInventory(Inventory inventory) async {
-    String uniqueId = Uuid().v4();
+    String uniqueId = const Uuid().v4();
     String userId = await userSessionManager.getUserId();
     await firestore.collection('inventories').doc(uniqueId).set({
       'id': uniqueId,
@@ -87,5 +87,37 @@ class FirebaseInventoryRepository implements InventoryRepository {
   @override
   Future<void> deleteInventory(String id) async {
     await firestore.collection('inventories').doc(id).delete();
+  }
+
+  @override
+  Future<void> updateInventoryQuantity(String inventoryId, int quantity) async {
+    final docRef = firestore.collection('inventories').doc(inventoryId);
+    final snapshot = await docRef.get();
+    if (snapshot.exists) {
+      final oldData = snapshot.data() ?? {};
+
+      final updatedData = {
+        'quantity': quantity,
+        'lastUpdated': Timestamp.now(),
+      };
+
+      // Calculate changes
+      final changes = loggerRepository.getChanges(
+        oldData: oldData,
+        newData: updatedData,
+      );
+
+      // Update the inventory
+      await docRef.update(updatedData);
+
+      // Log changes if any
+      if (changes.isNotEmpty) {
+        await loggerRepository.logChange(
+          action: 'update',
+          id: inventoryId,
+          changes: changes,
+        );
+      }
+    }
   }
 }

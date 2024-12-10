@@ -37,5 +37,6 @@ class InventoryBloc extends Bloc<InventoryEvent, InventoryState> {
         emit(InventoryError(e.toString()));
       }
     });
+    add(LoadInventories());
   }
 }
