@@ -2,7 +2,7 @@ import 'package:el_rapido_inc/dashboard/inventory/domain/inventory.dart';
 import 'package:el_rapido_inc/dashboard/inventory/domain/inventory_repository.dart';
 import 'package:el_rapido_inc/dashboard/merchant/data/model/mechants_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:el_rapido_inc/dashboard/merchant/data/model/merchant_inventory.dart';
+import 'package:el_rapido_inc/merchantinventory/data/model/merchant_inventory.dart';
 import 'package:uuid/uuid.dart';
 
 abstract class MerchantsRepository {
@@ -30,7 +30,6 @@ class MerchantsRepositoryImpl implements MerchantsRepository {
       'id': id,
       'name': merchant.name,
       'location': merchant.location,
-      'inventoryList': [],
     });
   }
 
@@ -46,9 +45,6 @@ class MerchantsRepositoryImpl implements MerchantsRepository {
           id: data['id'],
           name: data['name'],
           location: data['location'],
-          inventoryList: (data['inventoryList'] as List)
-              .map((item) => MerchantInventory.fromMap(item))
-              .toList(),
         );
       }).toList();
     });
@@ -60,8 +56,6 @@ class MerchantsRepositoryImpl implements MerchantsRepository {
     await merchantDoc.update({
       'name': merchant.name,
       'location': merchant.location,
-      'inventoryList':
-          merchant.inventoryList.map((inv) => inv.toMap()).toList(),
     });
   }
 
@@ -108,9 +102,6 @@ class MerchantsRepositoryImpl implements MerchantsRepository {
         id: data['id'],
         name: data['name'],
         location: data['location'],
-        inventoryList: (data['inventoryList'] as List)
-            .map((item) => MerchantInventory.fromMap(item))
-            .toList(),
       );
     }).toList();
   }

@@ -1,5 +1,5 @@
 import 'package:el_rapido_inc/dashboard/merchant/data/model/mechants_model.dart';
-import 'package:el_rapido_inc/dashboard/merchant/data/model/merchant_inventory.dart';
+import 'package:el_rapido_inc/merchantinventory/data/model/merchant_inventory.dart';
 import 'package:equatable/equatable.dart';
 
 abstract class MerchantEvent extends Equatable {

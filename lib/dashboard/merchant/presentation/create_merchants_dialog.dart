@@ -64,7 +64,6 @@ void showCreateMerchantDialog(
                               id: merchant?.id ?? '',
                               name: nameController.text,
                               location: locationController.text,
-                              inventoryList: merchant?.inventoryList ?? [],
                             );
                             onAdd(newMerchant);
                             Navigator.of(context).pop();

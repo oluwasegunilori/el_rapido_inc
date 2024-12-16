@@ -6,6 +6,7 @@ import 'package:el_rapido_inc/auth/presentation/signup/signup_page.dart';
 import 'package:el_rapido_inc/auth/presentation/splashscreen/splashscreen.dart';
 import 'package:el_rapido_inc/auth/presentation/verification/verification_page.dart';
 import 'package:el_rapido_inc/main.dart';
+import 'package:el_rapido_inc/merchantinventory/presentation/merchant_inventory_page.dart';
 import 'package:go_router/go_router.dart';
 
 final GoRouter appRouter = GoRouter(
@@ -37,6 +38,16 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/home',
       builder: (context, state) => const MyHomePage(title: "title"),
+    ),
+    GoRoute(
+      path: '/merchantinventory',
+      builder: (context, state) {
+        final String? merchantId = state.uri.queryParameters['merchant_id'];
+        if (merchantId != null) {
+          return MerchantInventoryPage(merchantId: merchantId);
+        }
+        return const DashboardPage();
+      },
     ),
   ],
   redirect: (context, state) async {

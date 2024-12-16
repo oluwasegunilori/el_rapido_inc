@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-Widget routeWidget(
+Widget  routeWidget(
     {required String text,
     required String route,
     required BuildContext context}) {
