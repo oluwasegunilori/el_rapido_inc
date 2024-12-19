@@ -69,7 +69,7 @@ class UserSessionManagerImpl implements UserSessionManager {
     await prefs.setString(_keyEmail, user.email);
     await prefs.setString(_keyExpiry, expirationTime);
   }
-  
+
   @override
   Future<String> getUserId() async {
     final prefs = await SharedPreferences.getInstance();

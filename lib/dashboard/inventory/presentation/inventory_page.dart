@@ -1,3 +1,4 @@
+import 'package:el_rapido_inc/auth/presentation/logout.dart';
 import 'package:el_rapido_inc/dashboard/inventory/presentation/create_inventory_dialog.dart';
 import 'package:el_rapido_inc/dashboard/inventory/presentation/list/inventory_item.dart';
 import 'package:flutter/material.dart';
@@ -23,6 +24,9 @@ class InventoryPage extends StatelessWidget {
           ),
         ),
         elevation: 4,
+        actions: [
+          buildLogoutButton(context),
+        ],
       ),
       body: BlocBuilder<InventoryBloc, InventoryState>(
         builder: (context, state) {
@@ -41,9 +45,7 @@ class InventoryPage extends StatelessWidget {
                       });
                     },
                     onDelete: () {},
-                    onManageMerchants: () {
-                       
-                    },
+                    onManageMerchants: () {},
                   );
                 }).toList());
           } else if (state is InventoryError) {

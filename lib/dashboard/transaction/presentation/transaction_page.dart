@@ -1,4 +1,5 @@
 import 'package:data_table_2/data_table_2.dart';
+import 'package:el_rapido_inc/auth/presentation/logout.dart';
 import 'package:el_rapido_inc/dashboard/inventory/domain/inventory.dart';
 import 'package:el_rapido_inc/dashboard/inventory/presentation/inventory_bloc.dart';
 import 'package:el_rapido_inc/dashboard/inventory/presentation/inventory_state.dart';
@@ -48,6 +49,9 @@ class _TransactionPageState extends State<TransactionPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Transactions'),
+        actions: [
+          buildLogoutButton(context)
+        ],
       ),
       body: BlocBuilder<TransactionBloc, TransactionState>(
         bloc: transactionBloc,

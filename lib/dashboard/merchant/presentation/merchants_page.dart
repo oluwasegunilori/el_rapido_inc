@@ -1,3 +1,4 @@
+import 'package:el_rapido_inc/auth/presentation/logout.dart';
 import 'package:el_rapido_inc/core/app_router.dart';
 import 'package:el_rapido_inc/dashboard/merchant/presentation/create_merchants_dialog.dart';
 import 'package:el_rapido_inc/dashboard/merchant/presentation/list/merchant_item.dart';
@@ -25,6 +26,9 @@ class MerchantPage extends StatelessWidget {
           ),
         ),
         elevation: 4,
+        actions: [
+          buildLogoutButton(context),
+        ],
       ),
       body: BlocBuilder<MerchantBloc, MerchantState>(
         builder: (context, state) {
@@ -45,7 +49,8 @@ class MerchantPage extends StatelessWidget {
                         },
                         onDelete: () {},
                         onManageInventory: () {
-                          context.go("/merchantinventory?merchant_id=${merchant.id}");
+                          context.go(
+                              "/merchantinventory?merchant_id=${merchant.id}");
                           // Handle inventory management for the merchant
                         },
                       );
