@@ -11,8 +11,8 @@ import 'package:el_rapido_inc/dashboard/transaction/presentation/transaction_eve
 import 'package:el_rapido_inc/dashboard/transaction/presentation/transaction_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:get_it/get_it.dart';
 import 'package:intl/intl.dart';
+import 'package:fl_chart/fl_chart.dart';
 
 class TransactionPage extends StatefulWidget {
   const TransactionPage({super.key});
@@ -69,14 +69,11 @@ class _TransactionPageState extends State<TransactionPage> {
                       );
                       return Column(
                         children: [
-                          _buildGraph(state.transactions),
-                          const Divider(),
-                          const SizedBox(
-                            height: 20,
-                          ),
                           Row(
                             children: [
-                              Expanded(child: Center()),
+                              Expanded(
+                                  flex: 2,
+                                  child: _buildGraph(state.transactions)),
                               Padding(
                                 padding: const EdgeInsets.all(8.0),
                                 child: SizedBox(
@@ -96,8 +93,9 @@ class _TransactionPageState extends State<TransactionPage> {
                               ),
                             ],
                           ),
+                          const Divider(),
                           const SizedBox(
-                            height: 10,
+                            height: 20,
                           ),
                           _buildTransactionTable(
                             context,
@@ -154,9 +152,57 @@ class _TransactionPageState extends State<TransactionPage> {
   }
 
   Widget _buildGraph(List<Transaction> transactions) {
-    return const SizedBox(
+    // Group transactions by date and calculate total price for each day
+    final data = <DateTime, double>{};
+    for (var transaction in transactions) {
+      final date = DateTime(
+          transaction.date.year, transaction.date.month, transaction.date.day);
+      data[date] = (data[date] ?? 0) + transaction.totalPrice;
+    }
+
+    final barGroups = data.entries.map((entry) {
+      return BarChartGroupData(
+        x: entry.key.millisecondsSinceEpoch,
+        barRods: [
+          BarChartRodData(
+            toY: entry.value,
+            color: Colors.blue,
+            width: 16,
+          ),
+        ],
+      );
+    }).toList();
+
+    return SizedBox(
       height: 200,
-      child: Placeholder(), // Replace with any chart library, e.g., `fl_chart`
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: BarChart(
+          BarChartData(
+            alignment: BarChartAlignment.spaceAround,
+            titlesData: FlTitlesData(
+              leftTitles: AxisTitles(
+                sideTitles: SideTitles(showTitles: true, interval: 50),
+              ),
+              bottomTitles: AxisTitles(
+                sideTitles: SideTitles(
+                  showTitles: true,
+                  getTitlesWidget: (value, meta) {
+                    final date =
+                        DateTime.fromMillisecondsSinceEpoch(value.toInt());
+                    return Text(
+                      "${date.month}/${date.day}",
+                      style: const TextStyle(fontSize: 10),
+                    );
+                  },
+                  interval: (data.keys.length / 6).ceil().toDouble(),
+                ),
+              ),
+            ),
+            barGroups: barGroups,
+          ),
+        ),
+      ),
     );
   }
 
@@ -167,38 +213,42 @@ class _TransactionPageState extends State<TransactionPage> {
     List<Transaction> transactions,
   ) {
     return Expanded(
-      child: DataTable2(
-        columnSpacing: 12,
-        horizontalMargin: 12,
-        minWidth: 600,
-        headingRowColor: WidgetStateProperty.all(
-          Theme.of(context).colorScheme.primary.withAlpha(150),
-        ),
-        border: TableBorder.all(color: Colors.grey, width: 1),
-        columns: [
-          "Merchant",
-          "Inventory",
-          "Quantity",
-          "Price",
-          "Total Price",
-          "Date"
-        ].map((e) => dataColumnGen(e)).toList(),
-        rows: transactions.map((transaction) {
-          String merchantName =
-              merchants!.firstWhere((e) => e.id == transaction.merchantId).name;
-          String inventoryName = inventories
-              .firstWhere((e) => e.id == transaction.inventoryId)
-              .name;
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: DataTable2(
+          columnSpacing: 12,
+          horizontalMargin: 12,
+          minWidth: 600,
+          headingRowColor: WidgetStateProperty.all(
+            Theme.of(context).colorScheme.primary.withAlpha(150),
+          ),
+          border: TableBorder.all(color: Colors.grey, width: 1),
+          columns: [
+            "Merchant",
+            "Inventory",
+            "Quantity",
+            "Price",
+            "Total Price",
+            "Date"
+          ].map((e) => dataColumnGen(e)).toList(),
+          rows: transactions.map((transaction) {
+            String merchantName = merchants!
+                .firstWhere((e) => e.id == transaction.merchantId)
+                .name;
+            String inventoryName = inventories
+                .firstWhere((e) => e.id == transaction.inventoryId)
+                .name;
 
-          return DataRow(cells: [
-            DataCell(Text(merchantName)),
-            DataCell(Text(inventoryName)),
-            DataCell(Text(transaction.quantity.toString())),
-            DataCell(Text('\$${transaction.price.toStringAsFixed(2)}')),
-            DataCell(Text('\$${transaction.totalPrice.toStringAsFixed(2)}')),
-            DataCell(Text(_formatDate(transaction.date))),
-          ]);
-        }).toList(),
+            return DataRow(cells: [
+              DataCell(Text(merchantName)),
+              DataCell(Text(inventoryName)),
+              DataCell(Text(transaction.quantity.toString())),
+              DataCell(Text('\$${transaction.price.toStringAsFixed(2)}')),
+              DataCell(Text('\$${transaction.totalPrice.toStringAsFixed(2)}')),
+              DataCell(Text(_formatDate(transaction.date))),
+            ]);
+          }).toList(),
+        ),
       ),
     );
   }
