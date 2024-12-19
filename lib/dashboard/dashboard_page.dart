@@ -1,5 +1,6 @@
 import 'package:el_rapido_inc/dashboard/inventory/presentation/inventory_page.dart';
 import 'package:el_rapido_inc/dashboard/merchant/presentation/merchants_page.dart';
+import 'package:el_rapido_inc/dashboard/transaction/presentation/transaction_page.dart';
 import 'package:flutter/material.dart';
 
 class DashboardPage extends StatefulWidget {
@@ -13,9 +14,9 @@ class DashboardPageState extends State<DashboardPage> {
   int _selectedIndex = 0;
 
   final List<Widget> _pages = [
-    const Center(child: Text('Users Page', style: TextStyle(fontSize: 24))),
     const InventoryPage(),
     const MerchantPage(),
+    const TransactionPage(),
   ];
 
   @override
@@ -81,11 +82,6 @@ class DashboardPageState extends State<DashboardPage> {
             ),
             destinations: const [
               NavigationRailDestination(
-                icon: Icon(Icons.person),
-                selectedIcon: Icon(Icons.person_outline),
-                label: Text('Users'),
-              ),
-              NavigationRailDestination(
                 icon: Icon(Icons.inventory),
                 selectedIcon: Icon(Icons.inventory_outlined),
                 label: Text('Inventories'),
@@ -94,6 +90,11 @@ class DashboardPageState extends State<DashboardPage> {
                 icon: Icon(Icons.store),
                 selectedIcon: Icon(Icons.storefront),
                 label: Text('Merchants'),
+              ),
+              NavigationRailDestination(
+                icon: Icon(Icons.trending_up),
+                selectedIcon: Icon(Icons.storefront),
+                label: Text('Transactions'),
               ),
             ],
           ),

@@ -15,7 +15,9 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
   final UserRepository _userRepository;
   final FirebaseFirestore firestore;
 
-  LoginBloc(this._auth, this._googleSignIn, this._userSessionManager, this._userRepository, this.firestore) : super(LoginInitial()) {
+  LoginBloc(this._auth, this._googleSignIn, this._userSessionManager,
+      this._userRepository, this.firestore)
+      : super(LoginInitial()) {
     on<LoginButtonPressed>((event, emit) async {
       emit(LoginLoading());
       try {
@@ -32,7 +34,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
 
         await confirmUserActivation(userCreds, emit);
       } catch (e) {
-        emit(LoginFailure("Invalid credentials"));
+        emit(LoginFailure("Invalid credentials $e"));
       }
     });
 

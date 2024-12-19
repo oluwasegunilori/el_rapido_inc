@@ -7,6 +7,9 @@ import 'package:el_rapido_inc/dashboard/merchant/data/model/mechants_model.dart'
 import 'package:el_rapido_inc/dashboard/merchant/presentation/merchants_bloc.dart';
 import 'package:el_rapido_inc/dashboard/merchant/presentation/merchants_event.dart';
 import 'package:el_rapido_inc/dashboard/merchant/presentation/merchants_state.dart';
+import 'package:el_rapido_inc/dashboard/transaction/data/model/transaction_model.dart';
+import 'package:el_rapido_inc/dashboard/transaction/presentation/transaction_bloc.dart';
+import 'package:el_rapido_inc/dashboard/transaction/presentation/transaction_event.dart';
 import 'package:el_rapido_inc/merchantinventory/data/model/merchant_inventory.dart';
 import 'package:el_rapido_inc/merchantinventory/presentation/create_merchant_inventory_dialog.dart';
 import 'package:el_rapido_inc/merchantinventory/presentation/merchant_inventory_bloc.dart';
@@ -477,6 +480,16 @@ class _MerchantInventoryPageState extends State<MerchantInventoryPage> {
                       double.parse(priceController.text);
 
                   //create trans
+                  BlocProvider.of<TransactionBloc>(context).add(
+                      CreateTransaction(Transaction(
+                          id: "",
+                          merchantId: merchantInventory.merchantId,
+                          inventoryId: merchantInventory.inventoryId,
+                          date: DateTime.now(),
+                          quantity: updatedQuantity,
+                          price: transactionPrice,
+                          totalPrice: transactionPrice * updatedQuantity,
+                          createdBy: "")));
 
                   Navigator.of(context).pop();
                 }

@@ -2,6 +2,7 @@ import 'package:el_rapido_inc/core/app_router.dart';
 import 'package:el_rapido_inc/core/di/deps_inject.dart';
 import 'package:el_rapido_inc/dashboard/inventory/presentation/inventory_bloc.dart';
 import 'package:el_rapido_inc/dashboard/merchant/presentation/merchants_bloc.dart';
+import 'package:el_rapido_inc/dashboard/transaction/presentation/transaction_bloc.dart';
 import 'package:el_rapido_inc/main_web.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
@@ -34,6 +35,9 @@ class MyApp extends StatelessWidget {
           create: (BuildContext context) => getIt(),
         ),
         BlocProvider<MerchantBloc>(
+          create: (BuildContext context) => getIt(),
+        ),
+        BlocProvider<TransactionBloc>(
           create: (BuildContext context) => getIt(),
         ),
       ],
