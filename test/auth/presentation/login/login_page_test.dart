@@ -5,9 +5,11 @@ import 'package:el_rapido_inc/dashboard/dashboard_page.dart';
 import 'package:el_rapido_inc/auth/presentation/login/login_bloc.dart';
 import 'package:el_rapido_inc/auth/presentation/login/login_page.dart';
 import 'package:el_rapido_inc/auth/presentation/login/login_state.dart';
-import 'package:el_rapido_inc/auth/presentation/splashscreen/splashscreen.dart';
 import 'package:el_rapido_inc/core/di/deps_inject.dart';
+import 'package:el_rapido_inc/dashboard/inventory/presentation/inventory_bloc.dart';
+import 'package:el_rapido_inc/dashboard/inventory/presentation/inventory_state.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import '../splashscreen/splashscreen_page_test.dart';
@@ -15,10 +17,16 @@ import '../splashscreen/splashscreen_page_test.dart';
 void main() {
   group("Login Page Test", () {
     late MockLoginBloc mockLoginBloc;
+    late MockInventoryBloc mockInventoryBloc;
 
     setUp(() {
       mockLoginBloc = MockLoginBloc();
+      mockInventoryBloc = MockInventoryBloc();
+
       getIt.registerFactory<LoginBloc>(() => mockLoginBloc);
+      whenListen(
+          mockInventoryBloc, Stream.fromIterable([InventoryLoaded(const [])]),
+          initialState: InventoryLoaded([]));
     });
 
     tearDown(() {
@@ -33,19 +41,24 @@ void main() {
           initialState: LoginInitial());
 
       // Pump the app
-      await tester.pumpWidget(MaterialApp.router(
-        routerConfig: GoRouter(
-          initialLocation: '/login',
-          routes: [
-            GoRoute(
-              path: '/dashboard',
-              builder: (context, state) => DashboardPage(),
-            ),
-            GoRoute(
-              path: '/login',
-              builder: (context, state) => LoginPage(),
-            ),
-          ],
+      await tester.pumpWidget(MultiBlocProvider(
+        providers: [
+          BlocProvider<InventoryBloc>(create: (context) => mockInventoryBloc)
+        ],
+        child: MaterialApp.router(
+          routerConfig: GoRouter(
+            initialLocation: '/login',
+            routes: [
+              GoRoute(
+                path: '/dashboard',
+                builder: (context, state) => DashboardPage(),
+              ),
+              GoRoute(
+                path: '/login',
+                builder: (context, state) => LoginPage(),
+              ),
+            ],
+          ),
         ),
       ));
 

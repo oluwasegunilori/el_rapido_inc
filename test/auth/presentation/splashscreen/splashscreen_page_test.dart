@@ -7,7 +7,11 @@ import 'package:el_rapido_inc/auth/presentation/login/login_state.dart';
 import 'package:el_rapido_inc/auth/repository/user_sessions_manager.dart';
 import 'package:el_rapido_inc/core/app_router.dart';
 import 'package:el_rapido_inc/core/di/deps_inject.dart';
+import 'package:el_rapido_inc/dashboard/inventory/presentation/inventory_bloc.dart';
+import 'package:el_rapido_inc/dashboard/inventory/presentation/inventory_event.dart';
+import 'package:el_rapido_inc/dashboard/inventory/presentation/inventory_state.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
@@ -20,10 +24,12 @@ void main() {
   group('SplashScreen Tests', () {
     late MockUserSessionManager mockUserSessionManager;
     late MockLoginBloc mockLoginBloc;
+    late MockInventoryBloc mockInventoryBloc;
 
     setUp(() {
       mockUserSessionManager = MockUserSessionManager();
       mockLoginBloc = MockLoginBloc();
+      mockInventoryBloc = MockInventoryBloc();
       getIt.registerSingleton<UserSessionManager>(
         mockUserSessionManager,
       );
@@ -31,6 +37,10 @@ void main() {
       // Arrange
       whenListen(mockLoginBloc, Stream.fromIterable([LoginInitial()]),
           initialState: LoginInitial());
+
+      whenListen(
+          mockInventoryBloc, Stream.fromIterable([InventoryLoaded(const [])]),
+          initialState: InventoryLoaded([]));
     });
 
     tearDown(() {
@@ -45,8 +55,15 @@ void main() {
       appRouter.go("/");
 
       // Override the userSessionManager instance in SplashScreen
-      await tester.pumpWidget(MaterialApp.router(
-        routerConfig: appRouter,
+      await tester.pumpWidget(MultiBlocProvider(
+        providers: [
+          BlocProvider<InventoryBloc>(
+            create: (BuildContext context) => mockInventoryBloc,
+          )
+        ],
+        child: MaterialApp.router(
+          routerConfig: appRouter,
+        ),
       ));
 
       //Verify initial app router
@@ -69,8 +86,15 @@ void main() {
       // expect(appRouter.state?.fullPath, equals("/"));
 
       // Override the userSessionManager instance in SplashScreen
-      await tester.pumpWidget(MaterialApp.router(
-        routerConfig: appRouter,
+      await tester.pumpWidget(MultiBlocProvider(
+        providers: [
+          BlocProvider<InventoryBloc>(
+            create: (BuildContext context) => mockInventoryBloc,
+          )
+        ],
+        child: MaterialApp.router(
+          routerConfig: appRouter,
+        ),
       ));
 
       appRouter.go("/");
@@ -88,3 +112,6 @@ void main() {
 
 class MockLoginBloc extends MockBloc<LoginEvent, LoginState>
     implements LoginBloc {}
+
+class MockInventoryBloc extends MockBloc<InventoryEvent, InventoryState>
+    implements InventoryBloc {}
