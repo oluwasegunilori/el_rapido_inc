@@ -2,7 +2,6 @@ import 'package:el_rapido_inc/auth/presentation/auth_page_router.dart';
 import 'package:el_rapido_inc/auth/presentation/signup/signup_bloc.dart';
 import 'package:el_rapido_inc/auth/presentation/signup/signup_event.dart';
 import 'package:el_rapido_inc/auth/presentation/signup/signup_state.dart';
-import 'package:el_rapido_inc/core/app_router.dart';
 import 'package:el_rapido_inc/core/di/deps_inject.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -34,10 +33,13 @@ class SignupPage extends StatelessWidget {
         child: BlocListener<SignupBloc, SignupState>(
           listener: (context, state) {
             if (state is SignupSuccess) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(state.message ?? "")),
-              );
-              routeWidget(text: "Login", route: "/login", context: context);
+              if (!state.moveToDashBoard) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(state.message ?? "")),
+                );
+              }
+              routeNeglect(context,
+                  route: state.moveToDashBoard ? "/dashboard" : "/login");
             } else if (state is SignupFailure) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text(state.error)),

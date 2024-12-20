@@ -16,6 +16,8 @@ abstract class UserRepository {
   Future<void> saveSignUpDetailsTemporarily(User user);
 
   Future<bool> isUserActivated(String token);
+
+  Future<void> createUserFromGoogleLogin(User user);
 }
 
 const String USER_COLL = "users";
@@ -24,7 +26,6 @@ class FirestoreUserRepository implements UserRepository {
   final FirebaseFirestore firestore;
 
   FirestoreUserRepository({required this.firestore});
-
 
   @override
   Future<void> createUser(User user) async {
@@ -93,5 +94,14 @@ class FirestoreUserRepository implements UserRepository {
     final bool activated = data?['activated'] ?? false;
 
     return activated;
+  }
+
+  @override
+  Future<void> createUserFromGoogleLogin(User user) async {
+    final userDoc = await firestore.collection('users').doc(user.id).get();
+
+    if (!userDoc.exists) {
+      createUser(user);
+    }
   }
 }

@@ -1,3 +1,5 @@
+import 'package:google_sign_in/google_sign_in.dart';
+
 abstract class SignupEvent {}
 
 class SignupButtonPressed extends SignupEvent {
@@ -10,6 +12,14 @@ class SignupButtonPressed extends SignupEvent {
 }
 
 class GoogleSignInPressed extends SignupEvent {}
+
+class RenderButtonSignInPressed extends SignupEvent {
+  final GoogleSignInAccount? googleSignInAccount;
+
+  RenderButtonSignInPressed(this.googleSignInAccount);
+
+
+}
 
 class UserVerification extends SignupEvent {
   final String? token;

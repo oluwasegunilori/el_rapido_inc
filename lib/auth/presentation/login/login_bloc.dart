@@ -6,6 +6,7 @@ import 'package:el_rapido_inc/core/data/repository/user_repository.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:el_rapido_inc/core/data/model/user.dart' as inUser;
 import 'package:flutter/foundation.dart' show kIsWeb;
 
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
@@ -41,25 +42,12 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     on<GoogleSignInPressed>((event, emit) async {
       emit(LoginLoading());
       try {
-        GoogleSignInAccount? googleUser;
-        if (kIsWeb) {
-          googleUser = await _googleSignIn.signInSilently();
-        } else {
-          googleUser = await _googleSignIn.signIn();
-        }
-        final GoogleSignInAuthentication? googleAuth =
-            await googleUser?.authentication;
-
-        if (googleAuth?.accessToken != null && googleAuth?.idToken != null) {
-          final credential = GoogleAuthProvider.credential(
-            accessToken: googleAuth?.accessToken,
-            idToken: googleAuth?.idToken,
-          );
-          var userCreds = await _auth.signInWithCredential(credential);
-          confirmUserActivation(userCreds, emit);
-        } else {
-          emit(LoginFailure('Google Sign-In failed'));
-        }
+        GoogleAuthProvider authProvider = GoogleAuthProvider();
+        final userCreds = await _auth.signInWithPopup(authProvider);
+        saveUserSignIn(userCreds);
+        await _userRepository.createUserFromGoogleLogin(
+            inUser.User.fromFirebaseAuth(userCreds, activated: true));
+        emit(LoginSuccess());
       } catch (e) {
         emit(LoginFailure(e.toString()));
       }

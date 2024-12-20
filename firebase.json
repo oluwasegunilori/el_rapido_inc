@@ -39,6 +39,7 @@
     }
   },
   "hosting": {
+    "site": "elrapidoinv",
     "public": "build/web",
     "ignore": [
       "firebase.json",

@@ -30,7 +30,7 @@ Future<void> depsSetup() async {
   final prefs = await SharedPreferences.getInstance();
 
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
+  final GoogleSignIn _googleSignIn = GoogleSignIn(scopes: ["email"]);
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final Dio dio = Dio();
 
