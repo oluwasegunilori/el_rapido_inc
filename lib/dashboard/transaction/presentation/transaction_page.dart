@@ -49,9 +49,7 @@ class _TransactionPageState extends State<TransactionPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Transactions'),
-        actions: [
-          buildLogoutButton(context)
-        ],
+        actions: [buildLogoutButton(context)],
       ),
       body: BlocBuilder<TransactionBloc, TransactionState>(
         bloc: transactionBloc,
@@ -89,7 +87,7 @@ class _TransactionPageState extends State<TransactionPage> {
                                         stateMer.merchants,
                                         transactionsFilt,
                                       ),
-                                      Text("Search by"),
+                                      const Text("Search by"),
                                       _buildDropDown(),
                                     ],
                                   ),
@@ -156,29 +154,31 @@ class _TransactionPageState extends State<TransactionPage> {
   }
 
   Widget _buildGraph(List<Transaction> transactions) {
-    // Group transactions by date and calculate total price for each day
-    final data = <DateTime, double>{};
+    // Group transactions by month and calculate total price for each month
+    final monthlyData = <DateTime, double>{};
     for (var transaction in transactions) {
-      final date = DateTime(
-          transaction.date.year, transaction.date.month, transaction.date.day);
-      data[date] = (data[date] ?? 0) + transaction.totalPrice;
+      final monthKey = DateTime(transaction.date.year, transaction.date.month);
+      monthlyData[monthKey] =
+          (monthlyData[monthKey] ?? 0) + transaction.totalPrice;
     }
 
-    final barGroups = data.entries.map((entry) {
+    // Generate BarChartGroupData from the aggregated monthly data
+    final barGroups = monthlyData.entries.map((entry) {
       return BarChartGroupData(
-        x: entry.key.millisecondsSinceEpoch,
+        x: entry.key.month, // Use the month as the x value
         barRods: [
           BarChartRodData(
-            toY: entry.value,
+            toY: entry.value, // Total price for the month
             color: Colors.blue,
             width: 16,
+            borderRadius: BorderRadius.circular(4),
           ),
         ],
       );
     }).toList();
 
     return SizedBox(
-      height: 200,
+      height: 300,
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: BarChart(
@@ -186,24 +186,53 @@ class _TransactionPageState extends State<TransactionPage> {
             alignment: BarChartAlignment.spaceAround,
             titlesData: FlTitlesData(
               leftTitles: AxisTitles(
-                sideTitles: SideTitles(showTitles: true, interval: 50),
+                sideTitles: SideTitles(
+                  showTitles: false,
+                  interval: 50,
+                  reservedSize: 40,
+                  getTitlesWidget: (value, meta) {
+                    return Text(
+                      '\$${value.toStringAsFixed(0)}',
+                      style: const TextStyle(fontSize: 10),
+                    );
+                  },
+                ),
               ),
               bottomTitles: AxisTitles(
                 sideTitles: SideTitles(
                   showTitles: true,
                   getTitlesWidget: (value, meta) {
-                    final date =
-                        DateTime.fromMillisecondsSinceEpoch(value.toInt());
+                    // Get month name from month number
+                    final monthName = DateFormat.MMM().format(DateTime(
+                        0, value.toInt())); // Converts x value to a month
                     return Text(
-                      "${date.month}/${date.day}",
+                      monthName,
                       style: const TextStyle(fontSize: 10),
                     );
                   },
-                  interval: (data.keys.length / 6).ceil().toDouble(),
+                  reservedSize: 20,
+                  interval: 1,
                 ),
               ),
             ),
+            gridData: const FlGridData(show: false),
+            borderData: FlBorderData(
+              border:
+                  Border.all(color: Colors.grey.withOpacity(0.5), width: 0.5),
+            ),
             barGroups: barGroups,
+            barTouchData: BarTouchData(
+              touchTooltipData: BarTouchTooltipData(
+                getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                  final monthName = DateFormat.MMMM()
+                      .format(DateTime(0, group.x.toInt())); // Full month name
+                  return BarTooltipItem(
+                    '$monthName\n\$${rod.toY.toStringAsFixed(2)}',
+                    const TextStyle(color: Colors.white),
+                  );
+                },
+              ),
+            ),
           ),
         ),
       ),
