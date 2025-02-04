@@ -11,6 +11,7 @@ abstract class MerchantInventoryRepository {
           String merchantId, String inventoryId);
   Stream<List<MerchantInventory>> fetchMerchantInventoriesByMerchantId(
       String merchantId);
+  Future<void> reduceQuantity(String id, int quantity);
 }
 
 class MerchantInventoryRepositoryImpl implements MerchantInventoryRepository {
@@ -69,5 +70,13 @@ class MerchantInventoryRepositoryImpl implements MerchantInventoryRepository {
         .map((snapshot) => snapshot.docs
             .map((doc) => MerchantInventory.fromMap(doc.data()))
             .toList());
+  }
+
+  @override
+  Future<void> reduceQuantity(String id, int quantity) async {
+    _firestore
+        .collection('merchant_inventories')
+        .doc(id)
+        .update({"quantity": FieldValue.increment(-quantity)});
   }
 }

@@ -4,7 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'merchant_inventory_event.dart';
 import 'merchant_inventory_state.dart';
 
-class MerchantInventoryBloc extends Bloc<MerchantInventoryEvent, MerchantInventoryState> {
+class MerchantInventoryBloc
+    extends Bloc<MerchantInventoryEvent, MerchantInventoryState> {
   final MerchantInventoryRepository repository;
 
   MerchantInventoryBloc(this.repository) : super(MerchantInventoryInitial()) {
@@ -22,7 +23,8 @@ class MerchantInventoryBloc extends Bloc<MerchantInventoryEvent, MerchantInvento
     on<UpdateMerchantInventoryQuantity>((event, emit) async {
       emit(MerchantInventoryLoading());
       try {
-        await repository.updateMerchantInventoryQuantity(event.inventoryId, event.newQuantity);
+        await repository.updateMerchantInventoryQuantity(
+            event.inventoryId, event.newQuantity);
         emit(const MerchantInventoryOperationSuccess());
       } catch (e) {
         emit(MerchantInventoryFailure(e.toString()));
@@ -33,7 +35,8 @@ class MerchantInventoryBloc extends Bloc<MerchantInventoryEvent, MerchantInvento
     on<UpdateMerchantInventoryPrice>((event, emit) async {
       emit(MerchantInventoryLoading());
       try {
-        await repository.updateMerchantInventoryPrice(event.inventoryId, event.newPrice);
+        await repository.updateMerchantInventoryPrice(
+            event.inventoryId, event.newPrice);
         emit(const MerchantInventoryOperationSuccess());
       } catch (e) {
         emit(MerchantInventoryFailure(e.toString()));
@@ -44,8 +47,11 @@ class MerchantInventoryBloc extends Bloc<MerchantInventoryEvent, MerchantInvento
     on<FetchMerchantInventoriesByMerchantAndInventoryIds>((event, emit) async {
       emit(MerchantInventoryLoading());
       try {
-        final stream = repository.fetchMerchantInventoriesByMerchantAndInventoryIds(event.merchantId, event.inventoryId);
-        await emit.forEach<List<MerchantInventory>>(stream, onData: (inventories) {
+        final stream =
+            repository.fetchMerchantInventoriesByMerchantAndInventoryIds(
+                event.merchantId, event.inventoryId);
+        await emit.forEach<List<MerchantInventory>>(stream,
+            onData: (inventories) {
           return MerchantInventorySuccess(inventories);
         });
       } catch (e) {
@@ -57,13 +63,21 @@ class MerchantInventoryBloc extends Bloc<MerchantInventoryEvent, MerchantInvento
     on<FetchMerchantInventoriesByMerchantId>((event, emit) async {
       emit(MerchantInventoryLoading());
       try {
-        final stream = repository.fetchMerchantInventoriesByMerchantId(event.merchantId);
-        await emit.forEach<List<MerchantInventory>>(stream, onData: (inventories) {
+        final stream =
+            repository.fetchMerchantInventoriesByMerchantId(event.merchantId);
+        await emit.forEach<List<MerchantInventory>>(stream,
+            onData: (inventories) {
           return MerchantInventorySuccess(inventories);
         });
       } catch (e) {
         emit(MerchantInventoryFailure(e.toString()));
       }
     });
+
+    on<ReduceMerchantInventoryQuantityEvent>(
+      (event, emit) {
+        repository.reduceQuantity(event.merchantInventoryId, event.quantity);
+      },
+    );
   }
 }

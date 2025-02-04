@@ -54,4 +54,17 @@ class FetchMerchantInventoriesByMerchantId extends MerchantInventoryEvent {
 
   @override
   List<Object?> get props => [merchantId];
+  
+}
+
+
+class ReduceMerchantInventoryQuantityEvent extends MerchantInventoryEvent {
+  final String merchantInventoryId;
+  final int quantity;
+
+  const ReduceMerchantInventoryQuantityEvent(
+      {required this.merchantInventoryId, required this.quantity});
+
+  @override
+  List<Object?> get props => [merchantInventoryId, quantity];
 }

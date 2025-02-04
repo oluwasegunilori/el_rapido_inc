@@ -3,6 +3,7 @@ import 'package:el_rapido_inc/dashboard/inventory/presentation/create_inventory_
 import 'package:el_rapido_inc/dashboard/inventory/presentation/list/inventory_item.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:responsive_grid/responsive_grid.dart';
 import 'inventory_bloc.dart';
 import 'inventory_event.dart';
@@ -34,8 +35,9 @@ class InventoryPage extends StatelessWidget {
             return const Center(child: CircularProgressIndicator());
           } else if (state is InventoryLoaded) {
             return ResponsiveGridList(
-                desiredItemWidth: 200,
-                children: state.inventories.map((inven) {
+              desiredItemWidth: 200,
+              children: state.inventories.map(
+                (inven) {
                   return InventoryItem(
                     inventory: inven,
                     onEdit: () {
@@ -44,10 +46,15 @@ class InventoryPage extends StatelessWidget {
                         inventoryBloc.add(UpdateInventory(inventoryUpdated));
                       });
                     },
-                    onDelete: () {},
-                    onManageMerchants: () {},
+                    onManageMerchants: () {
+                      context.pushNamed("merchantsunderinventory",
+                          pathParameters: {"inventoryId": inven.id});
+                    },
+                    onClick: () {},
                   );
-                }).toList());
+                },
+              ).toList(),
+            );
           } else if (state is InventoryError) {
             return Center(child: Text(state.error));
           }

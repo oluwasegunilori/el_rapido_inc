@@ -1,5 +1,6 @@
 import 'package:data_table_2/data_table_2.dart';
 import 'package:el_rapido_inc/auth/presentation/logout.dart';
+import 'package:el_rapido_inc/core/screen_calc.dart';
 import 'package:el_rapido_inc/dashboard/inventory/domain/inventory.dart';
 import 'package:el_rapido_inc/dashboard/inventory/presentation/inventory_bloc.dart';
 import 'package:el_rapido_inc/dashboard/inventory/presentation/inventory_state.dart';
@@ -28,11 +29,41 @@ class _TransactionPageState extends State<TransactionPage> {
   String _filterQuery = "";
   String? selectedSearchOption = "merchant";
 
+  bool _isChartVisible = true;
+  DateTimeRange? _selectedRange;
+
+  Future<void> _pickDateRange() async {
+    DateTimeRange? picked = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(2024),
+      lastDate: DateTime(2100),
+      initialDateRange: _selectedRange,
+    );
+
+    if (picked != null) {
+      transactionBloc.add(FetchTransactions(dateRange: picked));
+      setState(() {
+        _selectedRange = picked;
+      });
+    }
+  }
+
+  String _formatDateRange() {
+    if (_selectedRange == null) return "No date selected";
+
+    String start = DateFormat("MMM dd, yyyy").format(_selectedRange!.start);
+    String end = DateFormat("MMM dd, yyyy").format(_selectedRange!.end);
+
+    return "$start - $end";
+  }
+
   @override
   void initState() {
     super.initState();
     transactionBloc = BlocProvider.of<TransactionBloc>(context);
-    transactionBloc.add(FetchTransactions());
+    transactionBloc
+        .add(FetchTransactions(dateRange: getThisAndLastMonthRange()));
+    _selectedRange = getThisAndLastMonthRange();
     _searchController.addListener(() {
       _filterQuery = _searchController.text.toLowerCase();
     });
@@ -50,6 +81,7 @@ class _TransactionPageState extends State<TransactionPage> {
       appBar: AppBar(
         title: const Text('Transactions'),
         actions: [buildLogoutButton(context)],
+        elevation: 4,
       ),
       body: BlocBuilder<TransactionBloc, TransactionState>(
         bloc: transactionBloc,
@@ -71,30 +103,54 @@ class _TransactionPageState extends State<TransactionPage> {
                       );
                       return Column(
                         children: [
-                          Row(
-                            children: [
-                              Expanded(
-                                  flex: 2,
-                                  child: _buildGraph(state.transactions)),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: SizedBox(
-                                  width: 400,
-                                  child: Column(
-                                    children: [
-                                      _buildSearchField(
-                                        stateInv.inventories,
-                                        stateMer.merchants,
-                                        transactionsFilt,
-                                      ),
-                                      const Text("Search by"),
-                                      _buildDropDown(),
-                                    ],
+                          SwitchListTile(
+                            title: const Text('Show Chart'),
+                            value: _isChartVisible,
+                            onChanged: (value) {
+                              setState(() {
+                                _isChartVisible = value;
+                              });
+                            },
+                          ),
+                          if (!isMobile(context)) ...[
+                            Row(
+                              children: [
+                                Expanded(flex: 1, child: graphWidget(state)),
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: SizedBox(
+                                    width: 400,
+                                    child: Column(
+                                      children: [
+                                        _buildSearchField(
+                                          stateInv.inventories,
+                                          stateMer.merchants,
+                                          transactionsFilt,
+                                        ),
+                                        const Text("Search by"),
+                                        _buildDropDown(),
+                                      ],
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ],
-                          ),
+                              ],
+                            )
+                          ] else ...[
+                            const SizedBox(
+                              height: 10,
+                            ),
+                            graphWidget(state),
+                            const SizedBox(
+                              height: 10,
+                            ),
+                            _buildSearchField(
+                              stateInv.inventories,
+                              stateMer.merchants,
+                              transactionsFilt,
+                            ),
+                            const Text("Search by"),
+                            _buildDropDown(),
+                          ],
                           const Divider(),
                           const SizedBox(
                             height: 20,
@@ -121,6 +177,24 @@ class _TransactionPageState extends State<TransactionPage> {
           }
           return const Center(child: Text('No Transactions Found'));
         },
+      ),
+    );
+  }
+
+  Widget graphWidget(TransactionLoaded state) {
+    return Visibility(
+      visible: _isChartVisible,
+      child: Column(
+        children: [
+          ElevatedButton(
+            onPressed: _pickDateRange,
+            child: Text(_selectedRange != null
+                ? _formatDateRange()
+                : "Select Date Range"),
+          ),
+          const SizedBox(height: 5),
+          _buildGraph(state.transactions),
+        ],
       ),
     );
   }
@@ -162,80 +236,73 @@ class _TransactionPageState extends State<TransactionPage> {
           (monthlyData[monthKey] ?? 0) + transaction.totalPrice;
     }
 
-    // Generate BarChartGroupData from the aggregated monthly data
-    final barGroups = monthlyData.entries.map((entry) {
-      return BarChartGroupData(
-        x: entry.key.month, // Use the month as the x value
-        barRods: [
-          BarChartRodData(
-            toY: entry.value, // Total price for the month
-            color: Colors.blue,
-            width: 16,
-            borderRadius: BorderRadius.circular(4),
-          ),
-        ],
-      );
+    // Convert Map<DateTime, double> to sorted list of FlSpot
+    final sortedEntries = monthlyData.entries.toList()
+      ..sort((a, b) => a.key.compareTo(b.key));
+
+    // Normalize DateTime to sequential index for x-axis
+    final List<FlSpot> dataPoints = sortedEntries.asMap().entries.map((entry) {
+      return FlSpot(entry.key.toDouble(), entry.value.value);
     }).toList();
 
     return SizedBox(
       height: 300,
       child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: BarChart(
-          BarChartData(
-            alignment: BarChartAlignment.spaceAround,
-            titlesData: FlTitlesData(
-              leftTitles: AxisTitles(
-                sideTitles: SideTitles(
-                  showTitles: false,
-                  interval: 50,
-                  reservedSize: 40,
-                  getTitlesWidget: (value, meta) {
-                    return Text(
-                      '\$${value.toStringAsFixed(0)}',
-                      style: const TextStyle(fontSize: 10),
-                    );
-                  },
+          padding: const EdgeInsets.all(8.0),
+          child: LineChart(
+            LineChartData(
+                minY: 0,
+                titlesData: FlTitlesData(
+                  leftTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      reservedSize: 40,
+                      interval: 800,
+                      getTitlesWidget: (value, meta) {
+                        return Text(
+                          '\$${value.toStringAsFixed(0)}',
+                          style: const TextStyle(fontSize: 10),
+                        );
+                      },
+                    ),
+                  ),
+                  rightTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false)),
+                  topTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false)),
+                  bottomTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      reservedSize: 20,
+                      interval: 1,
+                      getTitlesWidget: (value, meta) {
+                        final monthName = DateFormat('MMM, yyyy')
+                            .format(sortedEntries[value.toInt()].key);
+                        return Text(monthName,
+                            style: const TextStyle(fontSize: 10));
+                      },
+                    ),
+                  ),
                 ),
-              ),
-              bottomTitles: AxisTitles(
-                sideTitles: SideTitles(
-                  showTitles: true,
-                  getTitlesWidget: (value, meta) {
-                    // Get month name from month number
-                    final monthName = DateFormat.MMM().format(DateTime(
-                        0, value.toInt())); // Converts x value to a month
-                    return Text(
-                      monthName,
-                      style: const TextStyle(fontSize: 10),
-                    );
-                  },
-                  reservedSize: 20,
-                  interval: 1,
+                gridData: const FlGridData(show: false),
+                borderData: FlBorderData(
+                  border: Border.all(
+                      color: Colors.grey.withOpacity(0.5), width: 0.5),
                 ),
-              ),
-            ),
-            gridData: const FlGridData(show: false),
-            borderData: FlBorderData(
-              border:
-                  Border.all(color: Colors.grey.withOpacity(0.5), width: 0.5),
-            ),
-            barGroups: barGroups,
-            barTouchData: BarTouchData(
-              touchTooltipData: BarTouchTooltipData(
-                getTooltipItem: (group, groupIndex, rod, rodIndex) {
-                  final monthName = DateFormat.MMMM()
-                      .format(DateTime(0, group.x.toInt())); // Full month name
-                  return BarTooltipItem(
-                    '$monthName\n\$${rod.toY.toStringAsFixed(2)}',
-                    const TextStyle(color: Colors.white),
-                  );
-                },
-              ),
-            ),
-          ),
-        ),
-      ),
+                lineBarsData: [
+                  LineChartBarData(
+                    spots: dataPoints,
+                    isCurved: true,
+                    color: Colors.blue,
+                    barWidth: 3,
+                    isStrokeCapRound: true,
+                    belowBarData: BarAreaData(
+                        show: true, color: Colors.blue.withOpacity(0.2)),
+                    dotData: const FlDotData(show: false),
+                  ),
+                ],
+                clipData: const FlClipData.all()),
+          )),
     );
   }
 
@@ -322,24 +389,31 @@ class _TransactionPageState extends State<TransactionPage> {
       );
 
   Widget _buildDropDown() {
-    return Container(
-      decoration: BoxDecoration(
-          border: Border.all(), borderRadius: BorderRadius.circular(3)),
-      child: DropdownButton<String>(
-        isExpanded: true,
-        hint: const Text('Search By'),
-        value: selectedSearchOption,
-        items: const [
-          DropdownMenuItem(value: 'merchant', child: Text('Merchant')),
-          DropdownMenuItem(value: 'inventory', child: Text('Inventory')),
-        ],
-        onChanged: (value) {
-          setState(() {
-            selectedSearchOption = value;
-            _searchController.text = "";
-          });
-        },
-        borderRadius: BorderRadius.circular(3),
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Container(
+        decoration: BoxDecoration(
+            border: Border.all(), borderRadius: BorderRadius.circular(3)),
+        child: DropdownButton<String>(
+          isExpanded: true,
+          hint: const Text(
+            'Search By',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          value: selectedSearchOption,
+          items: const [
+            DropdownMenuItem(value: 'merchant', child: Text('Merchant')),
+            DropdownMenuItem(value: 'inventory', child: Text('Inventory')),
+            DropdownMenuItem(value: "author", child: Text("Author"))
+          ],
+          onChanged: (value) {
+            setState(() {
+              selectedSearchOption = value;
+              _searchController.text = "";
+            });
+          },
+          borderRadius: BorderRadius.circular(3),
+        ),
       ),
     );
   }

@@ -7,6 +7,7 @@ import 'package:el_rapido_inc/auth/presentation/splashscreen/splashscreen.dart';
 import 'package:el_rapido_inc/auth/presentation/verification/verification_page.dart';
 import 'package:el_rapido_inc/main.dart';
 import 'package:el_rapido_inc/merchantinventory/presentation/merchant_inventory_page.dart';
+import 'package:el_rapido_inc/merchantsunderinventory/presentation/merchants_under_inventory.dart';
 import 'package:go_router/go_router.dart';
 
 final GoRouter appRouter = GoRouter(
@@ -49,6 +50,17 @@ final GoRouter appRouter = GoRouter(
         return const DashboardPage();
       },
     ),
+    GoRoute(
+      name: "merchantsunderinventory",
+      path: "/inventory/:inventoryId/merchants",
+      builder: (context, state) {
+        final inventoryId = state.pathParameters['inventoryId'];
+        if (inventoryId == null) {
+          return const DashboardPage();
+        }
+        return MerchantsUnderInventory(inventoryId: inventoryId);
+      },
+    )
   ],
   redirect: (context, state) async {
     String? fullPath = state.fullPath;

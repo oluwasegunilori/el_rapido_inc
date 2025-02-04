@@ -491,6 +491,12 @@ class _MerchantInventoryPageState extends State<MerchantInventoryPage> {
                           totalPrice: transactionPrice * updatedQuantity,
                           createdBy: "")));
 
+                  getIt.get<MerchantInventoryBloc>().add(
+                      ReduceMerchantInventoryQuantityEvent(
+                          merchantInventoryId: merchantInventory.id,
+                          quantity: updatedQuantity));
+                          
+
                   Navigator.of(context).pop();
                 }
               },

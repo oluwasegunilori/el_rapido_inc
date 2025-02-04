@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:el_rapido_inc/dashboard/inventory/domain/inventory.dart';
 import 'package:el_rapido_inc/dashboard/merchant/data/model/mechants_model.dart';
@@ -121,6 +122,9 @@ class _MerchantInventoryDialogState extends State<MerchantInventoryDialog> {
                     merchantId: widget.merchant.id,
                     price: selectedInventory!.price,
                     quantity: quantity,
+                    status: InventoryStatus.started,
+                    createdAt: Timestamp.now(),
+                    lastUpdated: Timestamp.now(),
                   ),
                 ),
               );

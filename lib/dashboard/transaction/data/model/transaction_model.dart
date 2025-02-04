@@ -80,4 +80,5 @@ class Transaction extends Equatable {
         totalPrice,
         createdBy
       ];
+      
 }
