@@ -18,6 +18,8 @@ abstract class UserRepository {
   Future<bool> isUserActivated(String token);
 
   Future<void> createUserFromGoogleLogin(User user);
+
+  Stream<List<User>> fetchUsers();
 }
 
 const String USER_COLL = "users";
@@ -103,5 +105,14 @@ class FirestoreUserRepository implements UserRepository {
     if (!userDoc.exists) {
       createUser(user);
     }
+  }
+
+  @override
+  Stream<List<User>> fetchUsers() {
+    return firestore.collection('users').snapshots().map((querySnapShot) {
+      return querySnapShot.docs.map((data) {
+        return User.fromFirestore(data.data());
+      }).toList();
+    });
   }
 }

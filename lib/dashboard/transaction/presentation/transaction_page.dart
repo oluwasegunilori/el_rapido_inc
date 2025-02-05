@@ -1,5 +1,7 @@
 import 'package:data_table_2/data_table_2.dart';
 import 'package:el_rapido_inc/auth/presentation/logout.dart';
+import 'package:el_rapido_inc/core/data/model/user.dart';
+import 'package:el_rapido_inc/core/di/deps_inject.dart';
 import 'package:el_rapido_inc/core/screen_calc.dart';
 import 'package:el_rapido_inc/dashboard/inventory/domain/inventory.dart';
 import 'package:el_rapido_inc/dashboard/inventory/presentation/inventory_bloc.dart';
@@ -8,9 +10,13 @@ import 'package:el_rapido_inc/dashboard/merchant/data/model/mechants_model.dart'
 import 'package:el_rapido_inc/dashboard/merchant/presentation/merchants_bloc.dart';
 import 'package:el_rapido_inc/dashboard/merchant/presentation/merchants_state.dart';
 import 'package:el_rapido_inc/dashboard/transaction/data/model/transaction_model.dart';
+import 'package:el_rapido_inc/dashboard/transaction/presentation/show_transactions_dialog.dart';
 import 'package:el_rapido_inc/dashboard/transaction/presentation/transaction_bloc.dart';
 import 'package:el_rapido_inc/dashboard/transaction/presentation/transaction_event.dart';
 import 'package:el_rapido_inc/dashboard/transaction/presentation/transaction_state.dart';
+import 'package:el_rapido_inc/dashboard/user/presentation/user_bloc.dart';
+import 'package:el_rapido_inc/dashboard/user/presentation/user_event.dart';
+import 'package:el_rapido_inc/dashboard/user/presentation/user_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -25,9 +31,11 @@ class TransactionPage extends StatefulWidget {
 
 class _TransactionPageState extends State<TransactionPage> {
   late TransactionBloc transactionBloc;
+  late UserBloc userBloc;
   final TextEditingController _searchController = TextEditingController();
   String _filterQuery = "";
   String? selectedSearchOption = "merchant";
+  User? selectedCreatedByOption;
 
   bool _isChartVisible = true;
   DateTimeRange? _selectedRange;
@@ -60,10 +68,11 @@ class _TransactionPageState extends State<TransactionPage> {
   @override
   void initState() {
     super.initState();
+    userBloc = getIt<UserBloc>();
     transactionBloc = BlocProvider.of<TransactionBloc>(context);
-    transactionBloc
-        .add(FetchTransactions(dateRange: getThisAndLastMonthRange()));
-    _selectedRange = getThisAndLastMonthRange();
+    transactionBloc.add(FetchTransactions(dateRange: getLastTwoMonthsRange()));
+    userBloc.add(FetchUsers());
+    _selectedRange = getLastTwoMonthsRange();
     _searchController.addListener(() {
       _filterQuery = _searchController.text.toLowerCase();
     });
@@ -101,67 +110,78 @@ class _TransactionPageState extends State<TransactionPage> {
                         stateMer.merchants ?? [],
                         state.transactions,
                       );
-                      return Column(
-                        children: [
-                          SwitchListTile(
-                            title: const Text('Show Chart'),
-                            value: _isChartVisible,
-                            onChanged: (value) {
-                              setState(() {
-                                _isChartVisible = value;
-                              });
-                            },
-                          ),
-                          if (!isMobile(context)) ...[
-                            Row(
+                      return SingleChildScrollView(
+                        child: Column(
+                          children: [
+                            Column(
                               children: [
-                                Expanded(flex: 1, child: graphWidget(state)),
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: SizedBox(
-                                    width: 400,
-                                    child: Column(
-                                      children: [
-                                        _buildSearchField(
-                                          stateInv.inventories,
-                                          stateMer.merchants,
-                                          transactionsFilt,
-                                        ),
-                                        const Text("Search by"),
-                                        _buildDropDown(),
-                                      ],
+                                SwitchListTile(
+                                  title: const Text('Show Chart'),
+                                  value: _isChartVisible,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _isChartVisible = value;
+                                    });
+                                  },
+                                ),
+                                Divider()
+                              ],
+                            ),
+                            if (!isMobile(context)) ...[
+                              Row(
+                                children: [
+                                  Expanded(flex: 1, child: graphWidget(state)),
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: SizedBox(
+                                      width: 400,
+                                      child: Column(
+                                        children: [
+                                          const Text("Search by"),
+                                          _buildSearchByDropDown(),
+                                          const Text("Created by"),
+                                          _buildCreatedByDropDown(),
+                                          _buildSearchField(
+                                            stateInv.inventories,
+                                            stateMer.merchants,
+                                            transactionsFilt,
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
-                                ),
-                              ],
-                            )
-                          ] else ...[
+                                ],
+                              )
+                            ] else ...[
+                              const SizedBox(
+                                height: 10,
+                              ),
+                              graphWidget(state),
+                              const SizedBox(
+                                height: 10,
+                              ),
+                              const Text("Search by"),
+                              _buildSearchByDropDown(),
+                              const Text("Created by"),
+                              _buildCreatedByDropDown(),
+                              _buildSearchField(
+                                stateInv.inventories,
+                                stateMer.merchants,
+                                transactionsFilt,
+                              ),
+                            ],
+                            const Divider(),
                             const SizedBox(
-                              height: 10,
+                              height: 20,
                             ),
-                            graphWidget(state),
-                            const SizedBox(
-                              height: 10,
-                            ),
-                            _buildSearchField(
+                            _buildTransactionTable(
+                              context,
                               stateInv.inventories,
                               stateMer.merchants,
                               transactionsFilt,
                             ),
-                            const Text("Search by"),
-                            _buildDropDown(),
                           ],
-                          const Divider(),
-                          const SizedBox(
-                            height: 20,
-                          ),
-                          _buildTransactionTable(
-                            context,
-                            stateInv.inventories,
-                            stateMer.merchants,
-                            transactionsFilt,
-                          ),
-                        ],
+                        ),
                       );
                     } else {
                       return const Center(
@@ -211,7 +231,7 @@ class _TransactionPageState extends State<TransactionPage> {
           TextField(
             controller: _searchController,
             decoration: const InputDecoration(
-                hintText: 'Search ',
+                hintText: 'Search for....',
                 contentPadding:
                     EdgeInsets.symmetric(vertical: 8, horizontal: 12),
                 isDense: true, // Reduce size
@@ -312,7 +332,8 @@ class _TransactionPageState extends State<TransactionPage> {
     List<Merchant>? merchants,
     List<Transaction> transactions,
   ) {
-    return Expanded(
+    return SizedBox(
+      height: 1000,
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: DataTable2(
@@ -329,7 +350,8 @@ class _TransactionPageState extends State<TransactionPage> {
             "Quantity",
             "Price",
             "Total Price",
-            "Date"
+            "Date",
+            "Actions"
           ].map((e) => dataColumnGen(e)).toList(),
           rows: transactions.map((transaction) {
             String merchantName = merchants!
@@ -339,14 +361,32 @@ class _TransactionPageState extends State<TransactionPage> {
                 .firstWhere((e) => e.id == transaction.inventoryId)
                 .name;
 
-            return DataRow(cells: [
-              DataCell(Text(merchantName)),
-              DataCell(Text(inventoryName)),
-              DataCell(Text(transaction.quantity.toString())),
-              DataCell(Text('\$${transaction.price.toStringAsFixed(2)}')),
-              DataCell(Text('\$${transaction.totalPrice.toStringAsFixed(2)}')),
-              DataCell(Text(_formatDate(transaction.date))),
-            ]);
+            return DataRow(
+              cells: [
+                DataCell(Text(merchantName)),
+                DataCell(Text(inventoryName)),
+                DataCell(Text(transaction.quantity.toString())),
+                DataCell(Text('\$${transaction.price.toStringAsFixed(2)}')),
+                DataCell(
+                    Text('\$${transaction.totalPrice.toStringAsFixed(2)}')),
+                DataCell(Text(_formatDate(transaction.date))),
+                DataCell(
+                  const Center(child: Icon(Icons.remove_red_eye)),
+                  onTap: () {
+                    showTransactionDetails(
+                        context,
+                        transaction,
+                        merchants
+                            .firstWhere((e) => e.id == transaction.merchantId),
+                        inventories
+                            .firstWhere((e) => e.id == transaction.inventoryId),
+                        (userBloc.state as UserLoaded)
+                            .users
+                            .firstWhere((e) => e.id == transaction.createdBy));
+                  },
+                )
+              ],
+            );
           }).toList(),
         ),
       ),
@@ -376,6 +416,12 @@ class _TransactionPageState extends State<TransactionPage> {
           e.name.toLowerCase().contains(_filterQuery.toLowerCase()) &&
           e.id == transaction.inventoryId);
     }).toList();
+
+    if (selectedCreatedByOption != null) {
+      return transs.where((transaction) {
+        return transaction.createdBy == selectedCreatedByOption!.id;
+      }).toList();
+    }
     return transs;
   }
 
@@ -388,7 +434,7 @@ class _TransactionPageState extends State<TransactionPage> {
         label: Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
       );
 
-  Widget _buildDropDown() {
+  Widget _buildSearchByDropDown() {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Container(
@@ -414,6 +460,54 @@ class _TransactionPageState extends State<TransactionPage> {
           },
           borderRadius: BorderRadius.circular(3),
         ),
+      ),
+    );
+  }
+
+  Widget _buildCreatedByDropDown() {
+    return BlocProvider<UserBloc>(
+      create: (context) => userBloc,
+      child: BlocBuilder<UserBloc, UserState>(
+        builder: (context, state) {
+          if (state is! UserLoaded) {
+            return const Center();
+          }
+          List<DropdownMenuItem<User>>? items = state.users.map((e) {
+            return DropdownMenuItem(
+              value: e,
+              child: Text("${e.firstName} ${e.lastName}"),
+            );
+          }).toList();
+          items.insert(
+              0,
+              const DropdownMenuItem(
+                value: null,
+                child: Text("All users"),
+              ));
+          return Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Container(
+              decoration: BoxDecoration(
+                  border: Border.all(), borderRadius: BorderRadius.circular(3)),
+              child: DropdownButton<User>(
+                isExpanded: true,
+                hint: const Text(
+                  'Created By',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                value: selectedCreatedByOption,
+                items: items,
+                onChanged: (value) {
+                  setState(() {
+                    selectedCreatedByOption = value;
+                    _searchController.text = "";
+                  });
+                },
+                borderRadius: BorderRadius.circular(3),
+              ),
+            ),
+          );
+        },
       ),
     );
   }
