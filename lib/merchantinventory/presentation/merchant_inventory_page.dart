@@ -63,6 +63,7 @@ class _MerchantInventoryPageState extends State<MerchantInventoryPage> {
       child: Scaffold(
           appBar: AppBar(
             title: const Text('Merchant Inventory'),
+            elevation: 5,
           ),
           body: Padding(
             padding: const EdgeInsets.all(16.0),
@@ -250,7 +251,7 @@ class _MerchantInventoryPageState extends State<MerchantInventoryPage> {
                         ),
                       ],
                     ),
-                    SizedBox(
+                    const SizedBox(
                       height: 15,
                     ),
                     // Price with label styled differently
@@ -270,7 +271,7 @@ class _MerchantInventoryPageState extends State<MerchantInventoryPage> {
                         ),
                       ],
                     ),
-                    SizedBox(
+                    const SizedBox(
                       height: 15,
                     ),
 
@@ -381,6 +382,8 @@ class _MerchantInventoryPageState extends State<MerchantInventoryPage> {
                 if (updatedQuantity != null) {
                   // Handle update logic for quantity
                   print("Updated quantity: $updatedQuantity");
+                  merchantIventoryBloc.add(UpdateMerchantInventoryQuantity(
+                      merchantInventory, updatedQuantity));
                   // Add the update logic here, such as sending the updated quantity to Firestore
                 }
                 Navigator.of(context).pop();
@@ -495,7 +498,6 @@ class _MerchantInventoryPageState extends State<MerchantInventoryPage> {
                       ReduceMerchantInventoryQuantityEvent(
                           merchantInventoryId: merchantInventory.id,
                           quantity: updatedQuantity));
-                          
 
                   Navigator.of(context).pop();
                 }

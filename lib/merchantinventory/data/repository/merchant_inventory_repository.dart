@@ -4,7 +4,7 @@ import 'package:el_rapido_inc/merchantinventory/data/model/merchant_inventory.da
 
 abstract class MerchantInventoryRepository {
   Future<void> createMerchantInventory(MerchantInventory inventory);
-  Future<void> updateMerchantInventoryQuantity(String id, int quantity);
+  Future<void> updateMerchantInventoryQuantity(MerchantInventory merchantInventory, int quantity);
   Future<void> updateMerchantInventoryPrice(String id, double price);
   Stream<List<MerchantInventory>>
       fetchMerchantInventoriesByMerchantAndInventoryIds(
@@ -12,6 +12,9 @@ abstract class MerchantInventoryRepository {
   Stream<List<MerchantInventory>> fetchMerchantInventoriesByMerchantId(
       String merchantId);
   Future<void> reduceQuantity(String id, int quantity);
+  Stream<List<MerchantInventory>> fetchMerchantInventoriesByInventoryId(
+      String inventoryId);
+  Future<void> clearQuantity(MerchantInventory merchantInventory);
 }
 
 class MerchantInventoryRepositoryImpl implements MerchantInventoryRepository {
@@ -31,11 +34,16 @@ class MerchantInventoryRepositoryImpl implements MerchantInventoryRepository {
   }
 
   @override
-  Future<void> updateMerchantInventoryQuantity(String id, int quantity) async {
+  Future<void> updateMerchantInventoryQuantity(MerchantInventory merchantInventory, int quantity) async {
     await _firestore
         .collection('merchant_inventories')
-        .doc(id)
-        .update({'quantity': quantity});
+        .doc(merchantInventory.id)
+        .update({"quantity": FieldValue.increment(quantity)});
+
+    await _firestore
+        .collection("inventories")
+        .doc(merchantInventory.inventoryId)
+        .update({"quantity": FieldValue.increment(-quantity)});
   }
 
   @override
@@ -78,5 +86,30 @@ class MerchantInventoryRepositoryImpl implements MerchantInventoryRepository {
         .collection('merchant_inventories')
         .doc(id)
         .update({"quantity": FieldValue.increment(-quantity)});
+  }
+
+  @override
+  Stream<List<MerchantInventory>> fetchMerchantInventoriesByInventoryId(
+      String inventoryId) {
+    return _firestore
+        .collection('merchant_inventories')
+        .where('inventoryId', isEqualTo: inventoryId)
+        .snapshots()
+        .map((snapshot) => snapshot.docs
+            .map((doc) => MerchantInventory.fromMap(doc.data()))
+            .toList());
+  }
+
+  @override
+  Future<void> clearQuantity(MerchantInventory merchantInventory) async {
+    await _firestore
+        .collection('merchant_inventories')
+        .doc(merchantInventory.id)
+        .update({'quantity': 0, 'status': 'completed'});
+
+    await _firestore
+        .collection("inventories")
+        .doc(merchantInventory.inventoryId)
+        .update({"quantity": FieldValue.increment(merchantInventory.quantity)});
   }
 }

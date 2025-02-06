@@ -21,11 +21,9 @@ class MerchantInventoryBloc
 
     // Handle update quantity event
     on<UpdateMerchantInventoryQuantity>((event, emit) async {
-      emit(MerchantInventoryLoading());
       try {
         await repository.updateMerchantInventoryQuantity(
-            event.inventoryId, event.newQuantity);
-        emit(const MerchantInventoryOperationSuccess());
+            event.merchantInventory, event.newQuantity);
       } catch (e) {
         emit(MerchantInventoryFailure(e.toString()));
       }
@@ -33,11 +31,9 @@ class MerchantInventoryBloc
 
     // Handle update price event
     on<UpdateMerchantInventoryPrice>((event, emit) async {
-      emit(MerchantInventoryLoading());
       try {
         await repository.updateMerchantInventoryPrice(
             event.inventoryId, event.newPrice);
-        emit(const MerchantInventoryOperationSuccess());
       } catch (e) {
         emit(MerchantInventoryFailure(e.toString()));
       }
@@ -77,6 +73,27 @@ class MerchantInventoryBloc
     on<ReduceMerchantInventoryQuantityEvent>(
       (event, emit) {
         repository.reduceQuantity(event.merchantInventoryId, event.quantity);
+      },
+    );
+
+    // Handle fetch inventories by inventory ID
+    on<FetchMerchantInventoriesByInventoryId>((event, emit) async {
+      emit(MerchantInventoryLoading());
+      try {
+        final stream =
+            repository.fetchMerchantInventoriesByInventoryId(event.inventoryId);
+        await emit.forEach<List<MerchantInventory>>(stream,
+            onData: (inventories) {
+          return MerchantInventorySuccess(inventories);
+        });
+      } catch (e) {
+        emit(MerchantInventoryFailure(e.toString()));
+      }
+    });
+
+    on<ClearQuantitiesEvent>(
+      (event, emit) {
+        repository.clearQuantity(event.merchantInventory);
       },
     );
   }

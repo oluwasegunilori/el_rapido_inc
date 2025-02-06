@@ -49,7 +49,7 @@ class MerchantPage extends StatelessWidget {
                         },
                         onDelete: () {},
                         onManageInventory: () {
-                          context.go(
+                          context.push(
                               "/merchantinventory?merchant_id=${merchant.id}");
                           // Handle inventory management for the merchant
                         },

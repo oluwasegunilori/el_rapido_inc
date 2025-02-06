@@ -31,10 +31,10 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider<InventoryBloc>(
+        BlocProvider<MerchantBloc>(
           create: (BuildContext context) => getIt(),
         ),
-        BlocProvider<MerchantBloc>(
+        BlocProvider<InventoryBloc>(
           create: (BuildContext context) => getIt(),
         ),
         BlocProvider<TransactionBloc>(
