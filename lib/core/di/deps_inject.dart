@@ -4,6 +4,7 @@ import 'package:el_rapido_inc/auth/presentation/login/login_bloc.dart';
 import 'package:el_rapido_inc/auth/presentation/signup/signup_bloc.dart';
 import 'package:el_rapido_inc/auth/presentation/verification/verification_bloc.dart';
 import 'package:el_rapido_inc/auth/repository/user_sessions_manager.dart';
+import 'package:el_rapido_inc/core/clip_watcher.dart';
 import 'package:el_rapido_inc/core/data/repository/logger_repository.dart';
 import 'package:el_rapido_inc/core/data/repository/user_repository.dart';
 import 'package:el_rapido_inc/dashboard/inventory/data/image_upload_reposiotry_impl.dart';
@@ -90,4 +91,6 @@ Future<void> depsSetup() async {
       () => TransactionBloc(getIt<TransactionRepository>()));
 
   getIt.registerFactory<UserBloc>(() => UserBloc(getIt<UserRepository>()));
+
+  getIt.registerFactory<ClipBloc>(() => ClipBloc());
 }

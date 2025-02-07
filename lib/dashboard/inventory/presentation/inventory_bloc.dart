@@ -5,6 +5,7 @@ import 'inventory_state.dart';
 
 class InventoryBloc extends Bloc<InventoryEvent, InventoryState> {
   final InventoryRepository repository;
+  String? copiedImageLink;
 
   InventoryBloc(this.repository) : super(InventoryInitial()) {
     on<LoadInventories>((event, emit) async {
@@ -38,5 +39,9 @@ class InventoryBloc extends Bloc<InventoryEvent, InventoryState> {
       }
     });
     add(LoadInventories());
+  }
+
+  void setCopiedLink(String link) {
+    copiedImageLink = link;
   }
 }
