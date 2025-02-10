@@ -1,9 +1,7 @@
 import 'package:el_rapido_inc/auth/presentation/logout.dart';
-import 'package:el_rapido_inc/core/clip_watcher.dart';
 import 'package:el_rapido_inc/dashboard/inventory/presentation/create_inventory_dialog.dart';
 import 'package:el_rapido_inc/dashboard/inventory/presentation/list/inventory_item.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:responsive_grid/responsive_grid.dart';
@@ -71,7 +69,6 @@ class _InventoryPageState extends State<InventoryPage>
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          BlocProvider.of<ClipBloc>(context).setLink(null);
           showCreateInventoryDialog(context, null, (inventory) {
             inventoryBloc.add(AddInventory(inventory));
           });
@@ -85,7 +82,6 @@ class _InventoryPageState extends State<InventoryPage>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _checkClipboard();
   }
 
   @override
@@ -97,18 +93,7 @@ class _InventoryPageState extends State<InventoryPage>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state != AppLifecycleState.hidden) {
-      _checkClipboard();
     }
   }
 
-  Future<void> _checkClipboard() async {
-    try {
-      ClipboardData? data = await Clipboard.getData(Clipboard.kTextPlain);
-      if (data != null &&
-          data.text != null &&
-          data.text != context.read<ClipBloc>().state.link) {
-        BlocProvider.of<ClipBloc>(context).setLink(data.text!);
-      }
-    } catch (e) {}
-  }
 }

@@ -1,5 +1,4 @@
 import 'package:el_rapido_inc/core/app_router.dart';
-import 'package:el_rapido_inc/core/clip_watcher.dart';
 import 'package:el_rapido_inc/core/di/deps_inject.dart';
 import 'package:el_rapido_inc/dashboard/inventory/presentation/inventory_bloc.dart';
 import 'package:el_rapido_inc/dashboard/merchant/presentation/merchants_bloc.dart';
@@ -40,7 +39,6 @@ class MyApp extends StatelessWidget {
         BlocProvider<TransactionBloc>(
           create: (BuildContext context) => getIt(),
         ),
-        BlocProvider<ClipBloc>(create: (context) => getIt())
       ],
       child: MaterialApp.router(
         title: 'ElRapido INV',

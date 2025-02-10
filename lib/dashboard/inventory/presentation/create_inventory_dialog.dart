@@ -1,4 +1,3 @@
-import 'package:el_rapido_inc/core/clip_watcher.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:el_rapido_inc/dashboard/inventory/domain/inventory.dart';
 import 'package:flutter/material.dart';
@@ -18,6 +17,8 @@ void showCreateInventoryDialog(
       TextEditingController(text: inventory?.price.toString());
   final TextEditingController descriptionController =
       TextEditingController(text: inventory?.description);
+  final TextEditingController imageLinkCOntroller =
+      TextEditingController(text: inventory?.imageUrl);
 
   showDialog(
     context: context,
@@ -25,7 +26,7 @@ void showCreateInventoryDialog(
       final screenWidth = MediaQuery.of(context).size.width;
       final dialogWidth =
           screenWidth < 600 ? screenWidth * 0.9 : screenWidth * 0.5;
-      var copiedUrl = context.watch<ClipBloc>().state.link;
+      String? copiedUrl;
 
       return StatefulBuilder(
         builder: (context, setState) {
@@ -107,6 +108,29 @@ void showCreateInventoryDialog(
                         maxLines: 2,
                       ),
                       const SizedBox(height: 16),
+                      TextFormField(
+                        controller: imageLinkCOntroller,
+                        decoration: InputDecoration(
+                          labelText: 'Image Link',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                          ),
+                        ),
+                        validator: (value) {
+                          if (value == null) {
+                            return null;
+                          }
+                          return isValidUrl(value) ? 'Enter a link' : null;
+                        },
+                        onChanged: (value) {
+                          setState(
+                            () {
+                              copiedUrl = value;
+                            },
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 16),
                       GestureDetector(
                         onTap: () async {},
                         child: Container(
@@ -133,7 +157,7 @@ void showCreateInventoryDialog(
                                       ),
                                       const Center(
                                           child: Text(
-                                        'Note after uploading image,\nRight click on the image or long press and click "Copy Image address"\nThen navigate back here',
+                                        'Note after uploading image,\nRight click on the image or long press and click "Copy Image address"\nThen navigate back here and paste into image link box',
                                         style: TextStyle(
                                             fontWeight: FontWeight.bold),
                                       )),
