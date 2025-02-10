@@ -38,7 +38,7 @@ class _InventoryPageState extends State<InventoryPage>
         ],
       ),
       body: BlocBuilder<InventoryBloc, InventoryState>(
-        builder: (context, state) {
+        builder: (context1, state) {
           if (state is InventoryLoading) {
             return const Center(child: CircularProgressIndicator());
           } else if (state is InventoryLoaded) {
@@ -85,6 +85,7 @@ class _InventoryPageState extends State<InventoryPage>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _checkClipboard();
   }
 
   @override
@@ -95,20 +96,19 @@ class _InventoryPageState extends State<InventoryPage>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
+    if (state != AppLifecycleState.hidden) {
       _checkClipboard();
     }
   }
 
   Future<void> _checkClipboard() async {
-    if (!mounted) {
-      return;
-    }
-    ClipboardData? data = await Clipboard.getData(Clipboard.kTextPlain);
-    if (data != null &&
-        data.text != null &&
-        data.text != context.read<ClipBloc>().state.link) {
-      BlocProvider.of<ClipBloc>(context).setLink(data.text!);
-    }
+    try {
+      ClipboardData? data = await Clipboard.getData(Clipboard.kTextPlain);
+      if (data != null &&
+          data.text != null &&
+          data.text != context.read<ClipBloc>().state.link) {
+        BlocProvider.of<ClipBloc>(context).setLink(data.text!);
+      }
+    } catch (e) {}
   }
 }

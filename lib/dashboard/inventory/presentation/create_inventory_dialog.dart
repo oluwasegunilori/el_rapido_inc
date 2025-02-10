@@ -1,4 +1,3 @@
-
 import 'package:el_rapido_inc/core/clip_watcher.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:el_rapido_inc/dashboard/inventory/domain/inventory.dart';
@@ -138,9 +137,19 @@ void showCreateInventoryDialog(
                                         style: TextStyle(
                                             fontWeight: FontWeight.bold),
                                       )),
+                                      const Center(
+                                          child: SelectableText(
+                                              "https://imgur.com/upload"))
                                     ],
                                   )
-                                : Image.network(copiedUrl!),
+                                : GestureDetector(
+                                    child: Image.network(
+                                      copiedUrl!,
+                                    ),
+                                    onTap: () {
+                                      _launchURL("https://imgur.com/upload");
+                                    },
+                                  ),
                           ),
                         ),
                       ),
@@ -186,15 +195,18 @@ void showCreateInventoryDialog(
 void _launchURL(String url) async {
   if (await canLaunchUrl(Uri.parse(url))) {
     await launchUrl(Uri.parse(url),
-        webOnlyWindowName: '_blank'); // Opens in new tab
+        webOnlyWindowName: '_blank',
+        mode: LaunchMode.externalApplication); // Opens in new tab
   } else {
     throw 'Could not launch $url';
   }
 }
 
 bool isValidUrl(String? url) {
-  print("Here");
-  print(url);
   final Uri? uri = Uri.tryParse(url ?? "");
-  return uri != null && uri.hasScheme && uri.hasAuthority;
+  return uri != null &&
+      url != null &&
+      url.contains("imgur") &&
+      uri.hasScheme &&
+      uri.hasAuthority;
 }

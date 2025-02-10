@@ -14,6 +14,9 @@ class ClipBloc extends Cubit<ClipState> {
   ClipBloc() : super(ClipState());
 
   void setLink(String? link) {
+    if (state.link != null && link == null) {
+      return;
+    }
     emit(ClipState(link: link));
   }
 }
