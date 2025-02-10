@@ -1,5 +1,6 @@
 import 'package:el_rapido_inc/auth/presentation/logout.dart';
 import 'package:el_rapido_inc/core/app_router.dart';
+import 'package:el_rapido_inc/core/screen_calc.dart';
 import 'package:el_rapido_inc/dashboard/merchant/presentation/create_merchants_dialog.dart';
 import 'package:el_rapido_inc/dashboard/merchant/presentation/list/merchant_item.dart';
 import 'package:el_rapido_inc/dashboard/merchant/presentation/merchants_bloc.dart';
@@ -17,7 +18,7 @@ class MerchantPage extends StatelessWidget {
   Widget build(BuildContext context) {
     MerchantBloc merchantBloc = BlocProvider.of(context);
     return Scaffold(
-      appBar: AppBar(
+      appBar: !isMobile(context) ? AppBar(
         title: const Text(
           'Merchants',
           style: TextStyle(
@@ -29,7 +30,7 @@ class MerchantPage extends StatelessWidget {
         actions: [
           buildLogoutButton(context),
         ],
-      ),
+      ): null,
       body: BlocBuilder<MerchantBloc, MerchantState>(
         builder: (context, state) {
           if (state is MerchantLoadingState) {

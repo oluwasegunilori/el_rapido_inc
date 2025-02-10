@@ -87,11 +87,13 @@ class _TransactionPageState extends State<TransactionPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Transactions'),
-        actions: [buildLogoutButton(context)],
-        elevation: 4,
-      ),
+      appBar: !isMobile(context)
+          ? AppBar(
+              title: const Text('Transactions'),
+              actions: [buildLogoutButton(context)],
+              elevation: 4,
+            )
+          : null,
       body: BlocBuilder<TransactionBloc, TransactionState>(
         bloc: transactionBloc,
         builder: (context, state) {

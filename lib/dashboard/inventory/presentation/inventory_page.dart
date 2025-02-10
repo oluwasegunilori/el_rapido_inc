@@ -1,4 +1,5 @@
 import 'package:el_rapido_inc/auth/presentation/logout.dart';
+import 'package:el_rapido_inc/core/screen_calc.dart';
 import 'package:el_rapido_inc/dashboard/inventory/presentation/create_inventory_dialog.dart';
 import 'package:el_rapido_inc/dashboard/inventory/presentation/list/inventory_item.dart';
 import 'package:flutter/material.dart';
@@ -22,19 +23,21 @@ class _InventoryPageState extends State<InventoryPage>
   Widget build(BuildContext context) {
     InventoryBloc inventoryBloc = BlocProvider.of(context);
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Inventories',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 20,
-          ),
-        ),
-        elevation: 4,
-        actions: [
-          buildLogoutButton(context),
-        ],
-      ),
+      appBar: !isMobile(context)
+          ? AppBar(
+              title: const Text(
+                'Inventories',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20,
+                ),
+              ),
+              elevation: 4,
+              actions: [
+                buildLogoutButton(context),
+              ],
+            )
+          : null,
       body: BlocBuilder<InventoryBloc, InventoryState>(
         builder: (context1, state) {
           if (state is InventoryLoading) {
@@ -92,8 +95,6 @@ class _InventoryPageState extends State<InventoryPage>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state != AppLifecycleState.hidden) {
-    }
+    if (state != AppLifecycleState.hidden) {}
   }
-
 }
