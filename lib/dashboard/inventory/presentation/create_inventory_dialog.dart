@@ -134,7 +134,6 @@ void showCreateInventoryDialog(
                       GestureDetector(
                         onTap: () async {},
                         child: Container(
-                          height: 150,
                           width: double.infinity,
                           decoration: BoxDecoration(
                             border: Border.all(color: Colors.grey),
@@ -161,6 +160,9 @@ void showCreateInventoryDialog(
                                         style: TextStyle(
                                             fontWeight: FontWeight.bold),
                                       )),
+                                      const SizedBox(
+                                        height: 15,
+                                      ),
                                       const Center(
                                           child: SelectableText(
                                               "https://imgur.com/upload"))
@@ -169,6 +171,8 @@ void showCreateInventoryDialog(
                                 : GestureDetector(
                                     child: Image.network(
                                       copiedUrl!,
+                                      height: 100,
+                                      fit: BoxFit.fill,
                                     ),
                                     onTap: () {
                                       _launchURL("https://imgur.com/upload");
