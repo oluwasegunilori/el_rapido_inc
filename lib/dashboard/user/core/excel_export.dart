@@ -1,4 +1,3 @@
-
 import 'dart:typed_data';
 
 import 'package:el_rapido_inc/dashboard/inventory/domain/inventory.dart';
@@ -8,11 +7,15 @@ import 'package:excel/excel.dart';
 import 'package:intl/intl.dart';
 import 'dart:html' as html;
 
-
 Future<void> exportToExcel(List<Transaction> transactions,
     List<Inventory> inventories, List<Merchant>? merchants) async {
   final excel = Excel.createExcel();
   final sheet = excel['Transactions'];
+
+  // Define header row and make it bold
+  var headerStyle = CellStyle(
+    bold: true,
+  );
 
   // Add headers
   sheet.appendRow([
@@ -24,6 +27,12 @@ Future<void> exportToExcel(List<Transaction> transactions,
     TextCellValue('Date'),
   ]);
 
+  // Add header row
+  for (int i = 0; i < sheet.maxColumns; i++) {
+    sheet
+        .cell(CellIndex.indexByColumnRow(columnIndex: i, rowIndex: 0))
+        .cellStyle = headerStyle; // Apply bold style
+  }
   // Add data rows and calculate total amount
   double totalAmount = 0.0;
   for (var transaction in transactions) {
@@ -35,18 +44,12 @@ Future<void> exportToExcel(List<Transaction> transactions,
     double transactionTotalPrice = transaction.totalPrice;
 
     sheet.appendRow([
-      TextCellValue(
-      merchantName),
-      TextCellValue(
-      inventoryName),
-      TextCellValue(
-      transaction.quantity.toString()),
-      TextCellValue(
-      transaction.price.toStringAsFixed(2)),
-      TextCellValue(
-      transactionTotalPrice.toStringAsFixed(2)),
-      TextCellValue(
-      _formatDate(transaction.date)),
+      TextCellValue(merchantName),
+      TextCellValue(inventoryName),
+      TextCellValue(transaction.quantity.toString()),
+      TextCellValue(transaction.price.toStringAsFixed(2)),
+      TextCellValue(transactionTotalPrice.toStringAsFixed(2)),
+      TextCellValue(_formatDate(transaction.date)),
     ]);
 
     // Add to total amount
@@ -54,8 +57,19 @@ Future<void> exportToExcel(List<Transaction> transactions,
   }
 
   // Add total amount row at the bottom of the Total Price column
-  sheet.appendRow(
-      [ TextCellValue('Total Amount'),  TextCellValue(''),  TextCellValue(''),  TextCellValue(''),  TextCellValue(totalAmount.toStringAsFixed(2)),  TextCellValue('')]);
+  sheet.appendRow([
+    TextCellValue('Total Amount'),
+    TextCellValue(''),
+    TextCellValue(''),
+    TextCellValue(''),
+    TextCellValue(totalAmount.toStringAsFixed(2)),
+    TextCellValue('')
+  ]);
+
+  sheet
+      .cell(CellIndex.indexByColumnRow(
+          columnIndex: 4, rowIndex: transactions.length + 1))
+      .cellStyle = headerStyle;
 
   // Convert the Excel file to bytes
   final bytes = excel.encode()!;
@@ -68,7 +82,7 @@ Future<void> exportToExcel(List<Transaction> transactions,
     ..target = 'blank'
     ..download = 'transactions.xlsx'
     ..click();
-  
+
   // Clean up by revoking the object URL
   html.Url.revokeObjectUrl(url);
 }
