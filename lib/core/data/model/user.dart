@@ -25,6 +25,19 @@ class User extends Equatable {
     this.verificationSentDate, // Optional field
   });
 
+   User copyWith({bool? activated, UserRole? role}) {
+    return User(
+      id: id,
+      firstName: firstName,
+      lastName: lastName,
+      email: email,
+      role: role ?? this.role,
+      activated: activated ?? this.activated,
+      dateCreated: dateCreated,
+      verificationSentDate: verificationSentDate,
+    );
+  }
+
   /// Convert User to Firestore-compatible map
   Map<String, dynamic> toFirestore() {
     return {
@@ -35,7 +48,8 @@ class User extends Equatable {
       'role': role.name, // Store enum as a string
       'activated': activated,
       'dateCreated': dateCreated, // Save the Timestamp
-      'verificationSentDate': verificationSentDate, // Save the optional Timestamp
+      'verificationSentDate':
+          verificationSentDate, // Save the optional Timestamp
     };
   }
 
@@ -49,7 +63,8 @@ class User extends Equatable {
       'role': role.name, // Store enum as a string
       'activated': false,
       'dateCreated': dateCreated, // Save the Timestamp
-      'verificationSentDate': verificationSentDate, // Save the optional Timestamp
+      'verificationSentDate':
+          verificationSentDate, // Save the optional Timestamp
     };
   }
 
@@ -61,17 +76,19 @@ class User extends Equatable {
       lastName: map['lastName'] as String,
       email: map['email'] as String,
       role: UserRole.values.firstWhere(
-            (r) => r.name == map['role'],
+        (r) => r.name == map['role'],
         orElse: () => UserRole.customer, // Default to 'customer' if not matched
       ),
       activated: map['activated'] ?? false,
       dateCreated: map['dateCreated'] as Timestamp, // Convert to Timestamp
-      verificationSentDate: map['verificationSentDate'] as Timestamp?, // Optional Timestamp
+      verificationSentDate:
+          map['verificationSentDate'] as Timestamp?, // Optional Timestamp
     );
   }
 
   /// Create User from Firebase Auth UserCredential on signup
-  factory User.fromFirebaseAuth(UserCredential credential, {bool activated = false}) {
+  factory User.fromFirebaseAuth(UserCredential credential,
+      {bool activated = false}) {
     final firebaseUser = credential.user!;
     return User(
       id: firebaseUser.uid,
@@ -87,10 +104,10 @@ class User extends Equatable {
 
   /// Temporary User creation from Firebase Auth with additional details
   factory User.fromFirebaseAuthTemp(
-      UserCredential credential,
-      String firstName,
-      String lastName,
-      ) {
+    UserCredential credential,
+    String firstName,
+    String lastName,
+  ) {
     final firebaseUser = credential.user!;
     return User(
       id: firebaseUser.uid,
@@ -105,6 +122,14 @@ class User extends Equatable {
   }
 
   @override
-  List<Object?> get props =>
-      [id, firstName, lastName, email, role, activated, dateCreated, verificationSentDate];
+  List<Object?> get props => [
+        id,
+        firstName,
+        lastName,
+        email,
+        role,
+        activated,
+        dateCreated,
+        verificationSentDate
+      ];
 }

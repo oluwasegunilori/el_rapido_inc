@@ -17,5 +17,9 @@ class UserBloc extends Bloc<UserEvent, UserState> {
         emit(UserError("Failed to fetch users"));
       }
     });
+
+    on<UpdateUser>((event, emit) async {
+      await userRepository.toggleUser(event.user);
+    });
   }
 }

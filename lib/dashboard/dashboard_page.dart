@@ -2,6 +2,7 @@ import 'package:el_rapido_inc/auth/presentation/logout.dart';
 import 'package:el_rapido_inc/dashboard/inventory/presentation/inventory_page.dart';
 import 'package:el_rapido_inc/dashboard/merchant/presentation/merchants_page.dart';
 import 'package:el_rapido_inc/dashboard/transaction/presentation/transaction_page.dart';
+import 'package:el_rapido_inc/dashboard/user/presentation/user_screen.dart';
 import 'package:flutter/material.dart';
 
 class DashboardPage extends StatefulWidget {
@@ -18,12 +19,14 @@ class DashboardPageState extends State<DashboardPage> {
     const InventoryPage(),
     const MerchantPage(),
     const TransactionPage(),
+    const UserPage(),
   ];
 
   final List<String> _pagesTitle = [
     "Inventories",
     "Merchants",
     "Transactions",
+    "Users",
   ];
 
   @override
@@ -33,19 +36,21 @@ class DashboardPageState extends State<DashboardPage> {
       builder: (context, constraints) {
         bool isMobile = constraints.maxWidth < 600;
         return Scaffold(
-          appBar: isMobile ? AppBar(
-        title: Text(
-          _pagesTitle[_selectedIndex],
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 20,
-          ),
-        ),
-        elevation: 4,
-        actions: [
-          buildLogoutButton(context),
-        ],
-      ) : null,
+          appBar: isMobile
+              ? AppBar(
+                  title: Text(
+                    _pagesTitle[_selectedIndex],
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20,
+                    ),
+                  ),
+                  elevation: 4,
+                  actions: [
+                    buildLogoutButton(context),
+                  ],
+                )
+              : null,
           drawer: isMobile ? _buildDrawer(theme) : null,
           body: isMobile ? _buildMobileView() : _buildDesktopView(theme),
         );
@@ -125,6 +130,11 @@ class DashboardPageState extends State<DashboardPage> {
               selectedIcon: Icon(Icons.trending_up),
               label: Text('Transactions'),
             ),
+            NavigationRailDestination(
+              icon: Icon(Icons.people),
+              selectedIcon: Icon(Icons.people),
+              label: Text('Users'),
+            ),
           ],
         ),
         VerticalDivider(width: 2, thickness: 3, color: theme.dividerColor),
@@ -166,6 +176,7 @@ class DashboardPageState extends State<DashboardPage> {
           _drawerItem(Icons.inventory, 'Inventories', 0),
           _drawerItem(Icons.store, 'Merchants', 1),
           _drawerItem(Icons.trending_up, 'Transactions', 2),
+          _drawerItem(Icons.people, 'Users', 3),
         ],
       ),
     );

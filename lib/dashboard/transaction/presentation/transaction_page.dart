@@ -14,6 +14,7 @@ import 'package:el_rapido_inc/dashboard/transaction/presentation/show_transactio
 import 'package:el_rapido_inc/dashboard/transaction/presentation/transaction_bloc.dart';
 import 'package:el_rapido_inc/dashboard/transaction/presentation/transaction_event.dart';
 import 'package:el_rapido_inc/dashboard/transaction/presentation/transaction_state.dart';
+import 'package:el_rapido_inc/dashboard/user/core/excel_export.dart';
 import 'package:el_rapido_inc/dashboard/user/presentation/user_bloc.dart';
 import 'package:el_rapido_inc/dashboard/user/presentation/user_event.dart';
 import 'package:el_rapido_inc/dashboard/user/presentation/user_state.dart';
@@ -126,7 +127,7 @@ class _TransactionPageState extends State<TransactionPage> {
                                     });
                                   },
                                 ),
-                                Divider()
+                                const Divider()
                               ],
                             ),
                             if (!isMobile(context)) ...[
@@ -175,6 +176,22 @@ class _TransactionPageState extends State<TransactionPage> {
                             const Divider(),
                             const SizedBox(
                               height: 20,
+                            ),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: ElevatedButton(
+                                style: const ButtonStyle(
+                                    textStyle: WidgetStatePropertyAll(TextStyle(
+                                        fontWeight: FontWeight.bold))),
+                                onPressed: () async {
+                                  exportToExcel(transactionsFilt,
+                                      stateInv.inventories, stateMer.merchants);
+                                },
+                                child: const Text("Export to Excel"),
+                              ),
+                            ),
+                            const SizedBox(
+                              height: 5,
                             ),
                             _buildTransactionTable(
                               context,

@@ -20,6 +20,8 @@ abstract class UserRepository {
   Future<void> createUserFromGoogleLogin(User user);
 
   Stream<List<User>> fetchUsers();
+
+  Future<void> toggleUser(User user);
 }
 
 const String USER_COLL = "users";
@@ -113,6 +115,14 @@ class FirestoreUserRepository implements UserRepository {
       return querySnapShot.docs.map((data) {
         return User.fromFirestore(data.data());
       }).toList();
+    });
+  }
+  
+  @override
+  Future<void> toggleUser(User user) async {
+    await firestore.collection('users').doc(user.id).update({
+      'activated': user.activated,
+      'role' : user.role.name
     });
   }
 }
