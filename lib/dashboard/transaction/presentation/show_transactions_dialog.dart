@@ -5,12 +5,14 @@ import 'package:el_rapido_inc/dashboard/transaction/data/model/transaction_model
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-void showTransactionDetails(BuildContext context, Transaction transaction, Merchant merchant, Inventory inventory, User createdBy) {
+void showTransactionDetails(BuildContext context, Transaction transaction,
+    Merchant merchant, Inventory inventory, User createdBy) {
   showDialog(
     context: context,
     builder: (context) {
       return AlertDialog(
-        title: const Text("Transaction Details", style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text("Transaction Details",
+            style: TextStyle(fontWeight: FontWeight.bold)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -19,14 +21,20 @@ void showTransactionDetails(BuildContext context, Transaction transaction, Merch
             _buildDetailRow("Location", merchant.location),
             _buildDivider(),
             _buildDetailRow("Inventory", inventory.name),
-            _buildDetailRow("Quantity Available", inventory.quantity.toString()),
-            _buildDetailRow("Inventory Price", "\$${inventory.price.toStringAsFixed(2)}"),
+            _buildDetailRow(
+                "Quantity Available", inventory.quantity.toString()),
+            _buildDetailRow("Inventory Price",
+                "\$${inventory.costPrice.toStringAsFixed(2)}"),
             _buildDivider(),
-            _buildDetailRow("Transaction Quantity", transaction.quantity.toString()),
-            _buildDetailRow("Price per Unit", "\$${transaction.price.toStringAsFixed(2)}"),
-            _buildDetailRow("Total Price", "\$${transaction.totalPrice.toStringAsFixed(2)}"),
+            _buildDetailRow(
+                "Transaction Quantity", transaction.quantity.toString()),
+            _buildDetailRow(
+                "Price per Unit", "\$${transaction.price.toStringAsFixed(2)}"),
+            _buildDetailRow("Total Price",
+                "\$${transaction.totalPrice.toStringAsFixed(2)}"),
             _buildDetailRow("Date", _formatDate(transaction.date)),
-            _buildDetailRow("Created By", "${createdBy.firstName} ${createdBy.lastName}"),
+            _buildDetailRow(
+                "Created By", "${createdBy.firstName} ${createdBy.lastName}"),
           ],
         ),
         actions: [
@@ -47,7 +55,8 @@ Widget _buildDetailRow(String label, String value) {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(label, style: const TextStyle(fontWeight: FontWeight.w600)),
-        Flexible(child: Text(value, style: const TextStyle(color: Colors.black87))),
+        Flexible(
+            child: Text(value, style: const TextStyle(color: Colors.black87))),
       ],
     ),
   );

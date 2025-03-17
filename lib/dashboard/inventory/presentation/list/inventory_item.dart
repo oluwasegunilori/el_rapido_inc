@@ -5,6 +5,7 @@ class InventoryItem extends StatelessWidget {
   final Inventory inventory;
   final VoidCallback onEdit;
   final VoidCallback onManageMerchants;
+  final VoidCallback onSellDirectlyToCustomer;
   final VoidCallback onClick;
 
   const InventoryItem({
@@ -12,6 +13,7 @@ class InventoryItem extends StatelessWidget {
     required this.inventory,
     required this.onEdit,
     required this.onManageMerchants,
+    required this.onSellDirectlyToCustomer,
     required this.onClick,
   });
 
@@ -68,7 +70,7 @@ class InventoryItem extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8.0),
                     child: Text(
-                      'Price: \$${inventory.price}',
+                      'Selling Price: \$${inventory.sellingPrice}',
                       style: const TextStyle(fontSize: 14),
                     ),
                   ),
@@ -86,6 +88,9 @@ class InventoryItem extends StatelessWidget {
                       break;
                     case 'merchants':
                       onManageMerchants();
+                      break;
+                    case 'createTransaction':
+                      onSellDirectlyToCustomer();
                   }
                 },
                 itemBuilder: (context) => [
@@ -94,7 +99,10 @@ class InventoryItem extends StatelessWidget {
                     child: Text('Edit'),
                   ),
                   const PopupMenuItem(
-                      value: "merchants", child: Text("Merchants"))
+                      value: "merchants", child: Text("Merchants")),
+                  const PopupMenuItem(
+                      value: "createTransaction",
+                      child: Text("Create Transaction")),
                 ],
                 icon: const Icon(Icons.more_vert),
               ),

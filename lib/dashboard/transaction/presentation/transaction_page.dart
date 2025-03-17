@@ -38,7 +38,7 @@ class _TransactionPageState extends State<TransactionPage> {
   String? selectedSearchOption = "merchant";
   User? selectedCreatedByOption;
 
-  bool _isChartVisible = true;
+  bool _isChartVisible = false;
   DateTimeRange? _selectedRange;
 
   Future<void> _pickDateRange() async {
@@ -267,16 +267,17 @@ class _TransactionPageState extends State<TransactionPage> {
   }
 
   Widget _buildGraph(List<Transaction> transactions) {
-    // Group transactions by month and calculate total price for each month
-    final monthlyData = <DateTime, double>{};
+    // Group transactions by week and calculate total price for each week
+    final weeklyData = <DateTime, double>{};
     for (var transaction in transactions) {
-      final monthKey = DateTime(transaction.date.year, transaction.date.month);
-      monthlyData[monthKey] =
-          (monthlyData[monthKey] ?? 0) + transaction.totalPrice;
+      final weekStart = transaction.date
+          .subtract(Duration(days: transaction.date.weekday - 1));
+      final weekKey = DateTime(weekStart.year, weekStart.month, weekStart.day);
+      weeklyData[weekKey] = (weeklyData[weekKey] ?? 0) + transaction.totalPrice;
     }
 
     // Convert Map<DateTime, double> to sorted list of FlSpot
-    final sortedEntries = monthlyData.entries.toList()
+    final sortedEntries = weeklyData.entries.toList()
       ..sort((a, b) => a.key.compareTo(b.key));
 
     // Normalize DateTime to sequential index for x-axis
@@ -287,61 +288,61 @@ class _TransactionPageState extends State<TransactionPage> {
     return SizedBox(
       height: 300,
       child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: LineChart(
-            LineChartData(
-                minY: 0,
-                titlesData: FlTitlesData(
-                  leftTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      reservedSize: 40,
-                      interval: 800,
-                      getTitlesWidget: (value, meta) {
-                        return Text(
-                          '\$${value.toStringAsFixed(0)}',
-                          style: const TextStyle(fontSize: 10),
-                        );
-                      },
-                    ),
-                  ),
-                  rightTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false)),
-                  topTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false)),
-                  bottomTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      reservedSize: 20,
-                      interval: 1,
-                      getTitlesWidget: (value, meta) {
-                        final monthName = DateFormat('MMM, yyyy')
-                            .format(sortedEntries[value.toInt()].key);
-                        return Text(monthName,
-                            style: const TextStyle(fontSize: 10));
-                      },
-                    ),
-                  ),
+        padding: const EdgeInsets.all(8.0),
+        child: LineChart(
+          LineChartData(
+            minY: 0,
+            titlesData: FlTitlesData(
+              leftTitles: AxisTitles(
+                sideTitles: SideTitles(
+                  showTitles: true,
+                  reservedSize: 40,
+                  interval: 800,
+                  getTitlesWidget: (value, meta) {
+                    return Text('\$${value.toStringAsFixed(0)}',
+                        style: const TextStyle(fontSize: 10));
+                  },
                 ),
-                gridData: const FlGridData(show: false),
-                borderData: FlBorderData(
-                  border: Border.all(
-                      color: Colors.grey.withOpacity(0.5), width: 0.5),
+              ),
+              rightTitles:
+                  const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+              topTitles:
+                  const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+              bottomTitles: AxisTitles(
+                sideTitles: SideTitles(
+                  showTitles: true,
+                  reservedSize: 20,
+                  interval: 1,
+                  getTitlesWidget: (value, meta) {
+                    final weekLabel = DateFormat('MMM d')
+                        .format(sortedEntries[value.toInt()].key);
+                    return Text(weekLabel,
+                        style: const TextStyle(fontSize: 10));
+                  },
                 ),
-                lineBarsData: [
-                  LineChartBarData(
-                    spots: dataPoints,
-                    isCurved: true,
-                    color: Colors.blue,
-                    barWidth: 3,
-                    isStrokeCapRound: true,
-                    belowBarData: BarAreaData(
-                        show: true, color: Colors.blue.withOpacity(0.2)),
-                    dotData: const FlDotData(show: false),
-                  ),
-                ],
-                clipData: const FlClipData.all()),
-          )),
+              ),
+            ),
+            gridData: const FlGridData(show: false),
+            borderData: FlBorderData(
+              border:
+                  Border.all(color: Colors.grey.withOpacity(0.5), width: 0.5),
+            ),
+            lineBarsData: [
+              LineChartBarData(
+                spots: dataPoints,
+                isCurved: true,
+                color: Colors.blue,
+                barWidth: 3,
+                isStrokeCapRound: true,
+                belowBarData: BarAreaData(
+                    show: true, color: Colors.blue.withOpacity(0.2)),
+                dotData: const FlDotData(show: false),
+              ),
+            ],
+            clipData: const FlClipData.all(),
+          ),
+        ),
+      ),
     );
   }
 

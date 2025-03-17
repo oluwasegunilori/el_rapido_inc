@@ -1,4 +1,3 @@
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:el_rapido_inc/dashboard/inventory/domain/inventory.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -13,8 +12,10 @@ void showCreateInventoryDialog(
       TextEditingController(text: inventory?.name);
   final TextEditingController quantityController =
       TextEditingController(text: inventory?.quantity.toString());
-  final TextEditingController priceController =
-      TextEditingController(text: inventory?.price.toString());
+  final TextEditingController costPriceController =
+      TextEditingController(text: inventory?.costPrice.toString());
+  final TextEditingController sellingPriceController =
+      TextEditingController(text: inventory?.costPrice.toString());
   final TextEditingController descriptionController =
       TextEditingController(text: inventory?.description);
   final TextEditingController imageLinkCOntroller =
@@ -75,9 +76,9 @@ void showCreateInventoryDialog(
                       ),
                       const SizedBox(height: 16),
                       TextFormField(
-                        controller: priceController,
+                        controller: costPriceController,
                         decoration: InputDecoration(
-                          labelText: 'Price',
+                          labelText: 'Cost Price',
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12.0),
                           ),
@@ -85,7 +86,27 @@ void showCreateInventoryDialog(
                         keyboardType: TextInputType.number,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Price is required';
+                            return 'Cost Price is required';
+                          }
+                          if (double.tryParse(value) == null) {
+                            return 'Enter a valid number';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: sellingPriceController,
+                        decoration: InputDecoration(
+                          labelText: 'Selling Price',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                          ),
+                        ),
+                        keyboardType: TextInputType.number,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Selling Price is required';
                           }
                           if (double.tryParse(value) == null) {
                             return 'Enter a valid number';
@@ -120,7 +141,7 @@ void showCreateInventoryDialog(
                           if (value == null) {
                             return null;
                           }
-                          return isValidUrl(value) ? 'Enter a link' : null;
+                          return !isValidUrl(value) ? 'Enter a link' : null;
                         },
                         onChanged: (value) {
                           setState(
@@ -189,7 +210,9 @@ void showCreateInventoryDialog(
                               id: inventory?.id ?? "",
                               name: nameController.text,
                               quantity: int.parse(quantityController.text),
-                              price: double.parse(priceController.text),
+                              costPrice: double.parse(costPriceController.text),
+                              sellingPrice:
+                                  double.parse(sellingPriceController.text),
                               description: descriptionController.text,
                               imageUrl: copiedUrl,
                             );

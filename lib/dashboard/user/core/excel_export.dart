@@ -22,8 +22,11 @@ Future<void> exportToExcel(List<Transaction> transactions,
     TextCellValue('Merchant'),
     TextCellValue('Inventory'),
     TextCellValue('Quantity'),
-    TextCellValue('Price'),
-    TextCellValue('Total Price'),
+    TextCellValue('Cost Price'),
+    TextCellValue('Selling Price'),
+    TextCellValue('Profit'),
+    TextCellValue('Transaction Type'),
+    TextCellValue("Discount Type"),
     TextCellValue('Date'),
   ]);
 
@@ -35,6 +38,7 @@ Future<void> exportToExcel(List<Transaction> transactions,
   }
   // Add data rows and calculate total amount
   double totalAmount = 0.0;
+  double totalProfit = 0.0;
   for (var transaction in transactions) {
     String merchantName =
         merchants!.firstWhere((e) => e.id == transaction.merchantId).name;
@@ -43,17 +47,25 @@ Future<void> exportToExcel(List<Transaction> transactions,
 
     double transactionTotalPrice = transaction.totalPrice;
 
+    double profit = transactionTotalPrice -
+        (transactionTotalPrice * 0.13) -
+        (transaction.costPrice * transaction.quantity);
+
     sheet.appendRow([
       TextCellValue(merchantName),
       TextCellValue(inventoryName),
       TextCellValue(transaction.quantity.toString()),
-      TextCellValue(transaction.price.toStringAsFixed(2)),
+      TextCellValue(transaction.costPrice.toStringAsFixed(2)),
       TextCellValue(transactionTotalPrice.toStringAsFixed(2)),
+      TextCellValue(profit.toStringAsFixed(2)),
+      TextCellValue(transaction.transactionType.name),
+      TextCellValue(transaction.discountType.name),
       TextCellValue(_formatDate(transaction.date)),
     ]);
 
     // Add to total amount
     totalAmount += transactionTotalPrice;
+    totalProfit += profit;
   }
 
   // Add total amount row at the bottom of the Total Price column
@@ -63,6 +75,7 @@ Future<void> exportToExcel(List<Transaction> transactions,
     TextCellValue(''),
     TextCellValue(''),
     TextCellValue(totalAmount.toStringAsFixed(2)),
+    TextCellValue(totalProfit.toStringAsFixed(2)),
     TextCellValue('')
   ]);
 

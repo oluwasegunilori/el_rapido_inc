@@ -120,7 +120,7 @@ class _MerchantInventoryDialogState extends State<MerchantInventoryDialog> {
                     id: "",
                     inventoryId: selectedInventory!.id,
                     merchantId: widget.merchant.id,
-                    price: selectedInventory!.price,
+                    price: selectedInventory!.costPrice,
                     quantity: quantity,
                     status: InventoryStatus.started,
                     createdAt: Timestamp.now(),

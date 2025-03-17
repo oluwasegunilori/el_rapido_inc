@@ -5,7 +5,8 @@ class Inventory extends Equatable {
   final String id;
   final String name;
   final int quantity;
-  final double price;
+  final double costPrice;
+  final double sellingPrice;
   final Timestamp? lastUpdated;
   final String? createdBy;
   final String description;
@@ -15,19 +16,34 @@ class Inventory extends Equatable {
     required this.id,
     required this.name,
     required this.quantity,
-    required this.price,
+    required this.costPrice,
+    required this.sellingPrice,
     required this.description,
     this.imageUrl,
     this.createdBy,
     this.lastUpdated,
   });
 
+  Inventory removeQuantity(int quantity) {
+    return Inventory(
+      id: id,
+      name: name,
+      quantity: this.quantity - quantity,
+      costPrice: costPrice,
+      sellingPrice: sellingPrice,
+      description: description,
+      createdBy: createdBy,
+      imageUrl: imageUrl,
+    );
+  }
+
   @override
   List<Object?> get props => [
         id,
         name,
         quantity,
-        price,
+        costPrice,
+        sellingPrice,
         lastUpdated,
         createdBy,
         description,
@@ -42,7 +58,8 @@ class Inventory extends Equatable {
       id: map['id'] as String,
       name: map['name'] as String,
       quantity: map['quantity'] as int,
-      price: (map['price'] as num).toDouble(),
+      costPrice: (map['costPrice'] as num).toDouble(),
+      sellingPrice: (map['sellingPrice'] as num).toDouble(),
       lastUpdated: map['lastUpdated'] as Timestamp?,
       createdBy: map['createdBy'] as String?,
       description: map['description'] as String,

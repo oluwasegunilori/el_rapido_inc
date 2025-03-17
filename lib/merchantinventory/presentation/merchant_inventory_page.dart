@@ -266,7 +266,7 @@ class _MerchantInventoryPageState extends State<MerchantInventoryPage> {
                           ),
                         ),
                         Text(
-                          '\$${inventory.price.toStringAsFixed(2)}',
+                          '\$${inventory.costPrice.toStringAsFixed(2)}',
                           style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                       ],
@@ -304,6 +304,8 @@ class _MerchantInventoryPageState extends State<MerchantInventoryPage> {
                     } else if (value == 'createTransaction') {
                       _showAddTransactionDialog(
                           context, inventory, merchantInventory);
+                    } else if (value == 'returnInventory') {
+                      _showQuantityDialog(context, merchantInventory);
                     }
                   },
                   itemBuilder: (context) => [
@@ -337,6 +339,16 @@ class _MerchantInventoryPageState extends State<MerchantInventoryPage> {
                         ],
                       ),
                     ),
+                    const PopupMenuItem<String>(
+                      value: 'returnInventory',
+                      child: Row(
+                        children: [
+                          Icon(Icons.inventory_2),
+                          SizedBox(width: 8),
+                          Text('Return Inventory'),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ],
@@ -351,7 +363,8 @@ class _MerchantInventoryPageState extends State<MerchantInventoryPage> {
   }
 
   void _showQuantityDialog(
-      BuildContext context, MerchantInventory merchantInventory) {
+      BuildContext context, MerchantInventory merchantInventory,
+      {bool isReturn = false}) {
     final TextEditingController quantityController =
         TextEditingController(text: merchantInventory.quantity.toString());
 
@@ -359,7 +372,7 @@ class _MerchantInventoryPageState extends State<MerchantInventoryPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Add Quantity'),
+          title: Text(isReturn != true ? 'Add Quantity' : "Return Inventory"),
           content: TextField(
             controller: quantityController,
             keyboardType: TextInputType.number,
@@ -382,6 +395,9 @@ class _MerchantInventoryPageState extends State<MerchantInventoryPage> {
                 if (updatedQuantity != null) {
                   // Handle update logic for quantity
                   print("Updated quantity: $updatedQuantity");
+                  if (isReturn) {
+                    updatedQuantity = -updatedQuantity;
+                  }
                   merchantIventoryBloc.add(UpdateMerchantInventoryQuantity(
                       merchantInventory, updatedQuantity));
                   // Add the update logic here, such as sending the updated quantity to Firestore
@@ -400,111 +416,201 @@ class _MerchantInventoryPageState extends State<MerchantInventoryPage> {
       MerchantInventory merchantInventory) {
     final TextEditingController quantityController = TextEditingController();
     final TextEditingController priceController = TextEditingController();
+    final TextEditingController wholeDiscountController =
+        TextEditingController();
+    double percentageDiscount = 0.0;
+    bool isWholeDiscount = true;
+    TransactionType selectedTransactionType = TransactionType.Cash;
 
     final _formKey = GlobalKey<FormState>();
 
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Create Transaction'),
-          content: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(inventory.name),
-                const SizedBox(
-                  height: 15,
-                ),
-                TextFormField(
-                  controller: quantityController,
-                  keyboardType: TextInputType.number,
-                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                  decoration: const InputDecoration(
-                    labelText: 'Quantity',
-                    border: OutlineInputBorder(),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter a quantity.';
-                    }
-                    final int? enteredQuantity = int.tryParse(value);
-                    if (enteredQuantity == null) {
-                      return 'Please enter a valid number.';
-                    }
-                    if (enteredQuantity > merchantInventory.quantity) {
-                      return 'Quantity cannot exceed ${merchantInventory.quantity}.';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16.0),
-                TextFormField(
-                  controller: priceController,
-                  keyboardType:
-                      const TextInputType.numberWithOptions(decimal: true),
-                  inputFormatters: [
-                    FilteringTextInputFormatter.allow(
-                        RegExp(r'^\d+\.?\d{0,2}')),
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: const Text('Create Transaction'),
+              content: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(inventory.name),
+                    const SizedBox(height: 15),
+                    DropdownButtonFormField<TransactionType>(
+                      value: selectedTransactionType,
+                      decoration: const InputDecoration(
+                        labelText: 'Transaction Type',
+                        border: OutlineInputBorder(),
+                      ),
+                      items: TransactionType.values.map((TransactionType type) {
+                        return DropdownMenuItem<TransactionType>(
+                          value: type,
+                          child: Text(type.name),
+                        );
+                      }).toList(),
+                      onChanged: (TransactionType? newValue) {
+                        setState(() {
+                          selectedTransactionType = newValue!;
+                        });
+                      },
+                    ),
+                    const SizedBox(height: 16.0),
+                    TextFormField(
+                      controller: quantityController,
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      decoration: const InputDecoration(
+                        labelText: 'Quantity',
+                        border: OutlineInputBorder(),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter a quantity.';
+                        }
+                        final int? enteredQuantity = int.tryParse(value);
+                        if (enteredQuantity == null) {
+                          return 'Please enter a valid number.';
+                        }
+                        if (enteredQuantity > merchantInventory.quantity) {
+                          return 'Quantity cannot exceed ${merchantInventory.quantity}.';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16.0),
+                    TextFormField(
+                      controller: priceController,
+                      keyboardType:
+                          const TextInputType.numberWithOptions(decimal: true),
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(
+                            RegExp(r'^\d+\.?\d{0,2}'))
+                      ],
+                      decoration: const InputDecoration(
+                        labelText: 'Price',
+                        border: OutlineInputBorder(),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter a price.';
+                        }
+                        final double? enteredPrice = double.tryParse(value);
+                        if (enteredPrice == null) {
+                          return 'Please enter a valid number.';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16.0),
+                    Row(
+                      children: [
+                        const Text('Discount Type:'),
+                        Switch(
+                          value: isWholeDiscount,
+                          onChanged: (value) {
+                            setState(() {
+                              isWholeDiscount = value;
+                            });
+                          },
+                        ),
+                        Text(isWholeDiscount ? 'Whole Discount' : 'Percentage'),
+                      ],
+                    ),
+                    const SizedBox(height: 8.0),
+                    isWholeDiscount
+                        ? TextFormField(
+                            controller: wholeDiscountController,
+                            keyboardType: const TextInputType.numberWithOptions(
+                                decimal: true),
+                            decoration: const InputDecoration(
+                              labelText: 'Whole Discount',
+                              border: OutlineInputBorder(),
+                            ),
+                          )
+                        : Slider(
+                            value: percentageDiscount,
+                            min: 0,
+                            max: 100,
+                            divisions: 100,
+                            label: '${percentageDiscount.toStringAsFixed(0)}%',
+                            onChanged: (value) {
+                              setState(() {
+                                percentageDiscount = value;
+                              });
+                            },
+                          ),
                   ],
-                  decoration: const InputDecoration(
-                    labelText: 'Price',
-                    border: OutlineInputBorder(),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter a price.';
-                    }
-                    final double? enteredPrice = double.tryParse(value);
-                    if (enteredPrice == null) {
-                      return 'Please enter a valid number.';
-                    }
-                    return null;
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
                   },
+                  child: const Text('Cancel'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    if (_formKey.currentState!.validate()) {
+                      final int updatedQuantity =
+                          int.parse(quantityController.text);
+                      final double transactionPrice =
+                          double.parse(priceController.text);
+                      double discount = 0.0;
+
+                      if (isWholeDiscount) {
+                        discount =
+                            double.tryParse(wholeDiscountController.text) ??
+                                0.0;
+                      } else {
+                        discount = (percentageDiscount / 100) *
+                            (transactionPrice * updatedQuantity);
+                      }
+
+                      final priceWithoutTax =
+                          (transactionPrice * updatedQuantity) - discount;
+
+                      final double totalPrice =
+                          priceWithoutTax + (priceWithoutTax * 0.13);
+
+                      BlocProvider.of<TransactionBloc>(context).add(
+                        CreateTransaction(
+                          Transaction(
+                            id: "",
+                            merchantId: merchantInventory.merchantId,
+                            inventoryId: merchantInventory.inventoryId,
+                            date: DateTime.now(),
+                            quantity: updatedQuantity,
+                            costPrice: inventory.costPrice,
+                            price: transactionPrice,
+                            totalPrice: totalPrice,
+                            discount: discount,
+                            discountType: isWholeDiscount
+                                ? DiscountType.Whole
+                                : DiscountType.Percentage,
+                            createdBy: "",
+                            transactionType: selectedTransactionType,
+                          ),
+                        ),
+                      );
+
+                      getIt.get<MerchantInventoryBloc>().add(
+                            ReduceMerchantInventoryQuantityEvent(
+                              merchantInventoryId: merchantInventory.id,
+                              quantity: updatedQuantity,
+                            ),
+                          );
+
+                      Navigator.of(context).pop();
+                    }
+                  },
+                  child: const Text('Create'),
                 ),
               ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                if (_formKey.currentState!.validate()) {
-                  // If all validations pass, process the data
-                  final int updatedQuantity =
-                      int.parse(quantityController.text);
-                  final double transactionPrice =
-                      double.parse(priceController.text);
-
-                  //create trans
-                  BlocProvider.of<TransactionBloc>(context).add(
-                      CreateTransaction(Transaction(
-                          id: "",
-                          merchantId: merchantInventory.merchantId,
-                          inventoryId: merchantInventory.inventoryId,
-                          date: DateTime.now(),
-                          quantity: updatedQuantity,
-                          price: transactionPrice,
-                          totalPrice: transactionPrice * updatedQuantity,
-                          createdBy: "")));
-
-                  getIt.get<MerchantInventoryBloc>().add(
-                      ReduceMerchantInventoryQuantityEvent(
-                          merchantInventoryId: merchantInventory.id,
-                          quantity: updatedQuantity));
-
-                  Navigator.of(context).pop();
-                }
-              },
-              child: const Text('Create'),
-            ),
-          ],
+            );
+          },
         );
       },
     );
